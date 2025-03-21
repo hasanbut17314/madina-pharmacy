@@ -9,7 +9,7 @@ function App() {
 
   return (
     <>
-      <Button onClick={() => setCount((count) => count + 1)}>count: {count}</Button>
+      <Button onClick={() => setCount((count) => count + 1)}>count is: {count}</Button>
     </>
   )
 }
