@@ -1,3 +1,4 @@
-import RiderDashboard from "./RiderDashboard";
+import Rider from "./Rider";
+import RiderOrders from "./RiderOrders";
 
-export { RiderDashboard };
+export { Rider, RiderOrders };

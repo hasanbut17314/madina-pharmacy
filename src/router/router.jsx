@@ -1,26 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Home } from "../pages/general";
-import { ManagerDashboard } from "../pages/manager";
+import { Manager, ManagerOrder } from "../pages/manager";
 import { AdminDashboard } from "../pages/admin";
 import { UserProfile } from "../pages/user";
-import { RiderDashboard } from "../pages/rider";
+import { Rider, RiderOrders } from "../pages/rider";
 import {Layout} from ".";
 
-// const router = createBrowserRouter([
-//   {
-//     path: '/',
-//     element: <Layout />,
-//     children: [
-//       {
-//         path: '/',
-//         element: <Home />,
-//       },
-//       {
-//         path: 'manager',
-//       },
-//     ],
-//   },
-// ]);
 
 const router = createBrowserRouter([
   {
@@ -32,8 +17,8 @@ const router = createBrowserRouter([
       {
         path: "manager",
         children: [
-          { index: true, element: <ManagerDashboard /> },
-          // { path: "orders", element: <ManagerOrders /> },add other routes here
+          { index: true, element: <Manager /> },
+          { path: "order/:orderId", element: <ManagerOrder /> },
         ],
       },
 
@@ -56,8 +41,8 @@ const router = createBrowserRouter([
       {
         path: "rider",
         children: [
-          { index: true, element: <RiderDashboard /> },
-          // { path: "deliveries", element: <RiderDeliveries /> },add other routes here
+          { index: true, element: <Rider /> },
+          { path: "order/:orderId", element: <RiderOrders /> }
         ],
       },
     ],

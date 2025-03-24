@@ -1,3 +1,4 @@
-import ManagerDashboard from './ManagerDashboard'
+import Manager from './Manager'
+import ManagerOrder from './ManagerOrder'
 
-export { ManagerDashboard };
+export { Manager, ManagerOrder };
