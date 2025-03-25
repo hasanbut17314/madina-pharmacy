@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { Home } from "../pages/general";
+import { Cart, Home, Shop, Product } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
 import { AdminDashboard } from "../pages/admin";
 import { UserProfile } from "../pages/user";
@@ -13,6 +13,9 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
+      { path: "cart", element: <Cart /> },
+      { path: "shop", element: <Shop /> },
+      { path: "product/:proId", element: <Product /> },
 
       {
         path: "manager",
@@ -34,7 +37,6 @@ const router = createBrowserRouter([
         path: "user",
         children: [
           { index: true, element: <UserProfile /> },
-          // { path: "orders", element: <UserOrders /> },add other routes here
         ],
       },
 
