@@ -1,96 +1,201 @@
-import React, { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Download, Package, Clock, CheckCircle2 } from 'lucide-react';
 
-function ManagerOrder() {
-  const [rider, setRider] = useState("NONE");
+// Sample order data (in a real app, this would come from an API)
+const orderDetails = {
+  'ORD-001': {
+    id: 'ORD-001',
+    date: 'March 20, 2024',
+    status: 'Processing',
+    customerName: 'John Doe',
+    customerPhone: '+1 (555) 123-4567',
+    deliveryAddress: '123 Main St, Cityville, State 12345',
+    items: [
+      { 
+        name: 'Amoxicillin', 
+        quantity: 1, 
+        dosage: '500mg', 
+        price: 15.99,
+        description: 'Broad-spectrum antibiotic for bacterial infections',
+        manufacturer: 'PharmaCo Labs',
+        batchNumber: 'AMX-2024-001'
+      },
+      { 
+        name: 'Ibuprofen', 
+        quantity: 2, 
+        dosage: '200mg', 
+        price: 8.50,
+        description: 'Non-steroidal anti-inflammatory pain reliever',
+        manufacturer: 'MedCare Pharmaceuticals',
+        batchNumber: 'IBP-2024-002'
+      }
+    ],
+    subtotal: 32.99,
+    deliveryFee: 5.00,
+    total: 37.99
+  }
+};
 
-  const orderDetails = {
-    orderId: "ORD12345",
-    location: "123 Main Street, City",
-    totalAmount: "$150.00",
+const ManagerOrder = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const order = orderDetails[orderId];
+
+  const renderStatusIcon = (status) => {
+    switch (status) {
+      case 'Processing':
+        return <Clock className="w-5 h-5 text-blue-500" />;
+      case 'Open':
+        return <Package className="w-5 h-5 text-yellow-500" />;
+      case 'Delivered':
+        return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+      default:
+        return null;
+    }
   };
 
-  const availableRiders = ["Ali Khan", "Sara Ahmed", "David Smith", "Emily Johnson"];
+  const handleDownloadInvoice = () => {
+    // In a real app, this would trigger an invoice download
+    alert('Downloading Invoice for ' + order.id);
+  };
+
+  if (!order) {
+    return <div className="container mx-auto p-4">Order not found</div>;
+  }
 
   return (
-    <div className="p-2 sm:p-4">
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-3 sm:p-4">
-        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-700">
-          Order Details
-        </h2>
+    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
+      <div className="mb-6">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate(-1)}
+          className="mb-4 flex items-center"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Orders
+        </Button>
+      </div>
 
-        {/* Order Info Section */}
-        <div className="mb-3 sm:mb-4 p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50 text-sm sm:text-base">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-            <div className="flex items-center">
-              <span className="font-semibold text-gray-700 w-24 sm:w-32">Order ID:</span>
-              <span className="text-gray-600">{orderDetails.orderId}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="font-semibold text-gray-700 w-24 sm:w-32">Rider:</span>
-              {rider === "NONE" ? (
-                <Select onValueChange={(value) => setRider(value)}>
-                  <SelectTrigger className="w-40 bg-white border border-gray-300 rounded-md p-2">
-                    <SelectValue placeholder="Assign Rider" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 rounded-md shadow-md">
-                    {availableRiders.map((r, index) => (
-                      <SelectItem key={index} value={r}>
-                        {r}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <span className="text-gray-600">{rider}</span>
-              )}
-            </div>
-            <div className="flex items-center">
-              <span className="font-semibold text-gray-700 w-24 sm:w-32">Location:</span>
-              <span className="text-gray-600">{orderDetails.location}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="font-semibold text-gray-700 w-24 sm:w-32">Total Amount:</span>
-              <span className="text-gray-600">{orderDetails.totalAmount}</span>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Product Details Column */}
+        <div>
+          <Card className="h-full">
+            <CardHeader className="p-4 border-b">
+              <CardTitle className="text-xl font-bold">Product Details</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {order.items.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="mb-6 pb-6 border-b last:border-b-0"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{item.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        {item.quantity} x {item.dosage}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold text-red-600">
+                      ${item.price.toFixed(2)}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Description</p>
+                      <p className="text-sm">{item.description}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="text-xs text-gray-500">Manufacturer</p>
+                        <p className="text-sm">{item.manufacturer}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Batch Number</p>
+                        <p className="text-sm">{item.batchNumber}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Table of Ordered Items */}
-        <Table className="border border-gray-200 rounded-lg overflow-hidden text-sm sm:text-base">
-          <TableHeader>
-            <TableRow className="bg-gray-100">
-              <TableHead className="w-[60px] sm:w-[80px] text-gray-600 text-center">#</TableHead>
-              <TableHead className="text-gray-600">Image</TableHead>
-              <TableHead className="text-center text-gray-600">Name</TableHead>
-              <TableHead className="text-right text-gray-600">Quantity</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[1, 2, 3].map((num) => (
-              <TableRow key={num} className="hover:bg-gray-50 transition-all">
-                <TableCell className="font-medium text-center py-1 sm:py-0">{num}</TableCell>
-                <TableCell className="text-center py-1 sm:py-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 rounded-md my-1"></div>
-                </TableCell>
-                <TableCell className="text-center py-1 sm:py-0">Medicine Name</TableCell>
-                <TableCell className="text-right py-1 sm:py-0">10</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {/* Order Details Column */}
+        <div>
+          <Card className="h-full">
+            <CardHeader className="p-4 flex flex-row items-center justify-between border-b">
+              <CardTitle className="text-xl font-bold">Order Information</CardTitle>
+              <div className="flex items-center space-x-2">
+                {renderStatusIcon(order.status)}
+                <span className="text-sm">{order.status}</span>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-4">
+              {/* Order Information */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <p className="text-xs text-gray-500">Order Number</p>
+                  <p className="text-sm font-semibold">{order.id}</p>
+                  
+                  <p className="text-xs text-gray-500 mt-4">Order Date</p>
+                  <p className="text-sm">{order.date}</p>
+                </div>
+                
+                <div>
+                  <p className="text-xs text-gray-500">Customer Name</p>
+                  <p className="text-sm font-semibold">{order.customerName}</p>
+                  
+                  <p className="text-xs text-gray-500 mt-4">Contact Number</p>
+                  <p className="text-sm">{order.customerPhone}</p>
+                </div>
+              </div>
+
+              {/* Delivery Address */}
+              <div className="mb-6 pb-6 border-b">
+                <p className="text-xs text-gray-500">Delivery Address</p>
+                <p className="text-sm">{order.deliveryAddress}</p>
+              </div>
+
+              {/* Order Summary */}
+              <div>
+                <div className="flex justify-between text-sm py-2">
+                  <span className="text-gray-500">Subtotal</span>
+                  <span>${order.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm py-2">
+                  <span className="text-gray-500">Delivery Fee</span>
+                  <span>${order.deliveryFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold py-2 border-t mt-2">
+                  <span>Total</span>
+                  <span className="text-red-600">${order.total.toFixed(2)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Download Invoice Button */}
+      <div className="mt-6">
+        <Button 
+          variant="destructive" 
+          size="lg"
+          onClick={handleDownloadInvoice}
+          className="w-full flex items-center justify-center bg-red-500 hover:bg-red-400"
+        >
+          <Download className="mr-3 h-5 w-5" /> Download Complete Invoice
+        </Button>
       </div>
     </div>
   );
-}
+};
 
 export default ManagerOrder;

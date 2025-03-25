@@ -1,65 +1,166 @@
-import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Package, Clock, CheckCircle2, Truck } from 'lucide-react';
 
-function Rider() {
+// Sample order data
+const orderData = {
+  activeOrders: [
+    {
+      id: 'ORD-001',
+      date: 'March 20',
+      status: 'Processing',
+      totalItems: 2,
+      total: 32.99,
+      customerName: 'John Doe',
+      address: '123 Main St, Cityville'
+    },
+    {
+      id: 'ORD-002',
+      date: 'March 19',
+      status: 'Open',
+      totalItems: 1,
+      total: 45.50,
+      customerName: 'Jane Smith',
+      address: '456 Elm St, Townsburg'
+    },
+    {
+      id: 'ORD-007',
+      date: 'March 19',
+      status: 'Open',
+      totalItems: 1,
+      total: 45.50,
+      customerName: 'Jane Smith',
+      address: '456 Elm St, Townsburg'
+    },
+    {
+      id: 'ORD-008',
+      date: 'March 19',
+      status: 'Processing',
+      totalItems: 1,
+      total: 45.50,
+      customerName: 'Jane Smith',
+      address: '456 Elm St, Townsburg'
+    }
+  ],
+  deliveredOrders: [
+    {
+      id: 'ORD-003',
+      date: 'March 15',
+      status: 'Delivered',
+      totalItems: 3,
+      total: 22.75,
+      customerName: 'Alice Johnson',
+      address: '789 Oak Rd, Villagetown'
+    },
+    {
+      id: 'ORD-004',
+      date: 'March 10',
+      status: 'Delivered',
+      totalItems: 1,
+      total: 15.99,
+      customerName: 'Bob Williams',
+      address: '101 Pine Lane, Hamletville'
+    },
+    {
+      id: 'ORD-005',
+      date: 'March 10',
+      status: 'Delivered',
+      totalItems: 1,
+      total: 15.99,
+      customerName: 'Bob Williams',
+      address: '101 Pine Lane, Hamletville'
+    },
+    {
+      id: 'ORD-006',
+      date: 'March 10',
+      status: 'Delivered',
+      totalItems: 1,
+      total: 15.99,
+      customerName: 'Bob Williams',
+      address: '101 Pine Lane, Hamletville'
+    }
+  ]
+};
+
+const Rider = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('active');
+
+  const renderStatusIcon = (status) => {
+    switch (status) {
+      case 'Processing':
+        return <Clock className="w-4 h-4 text-blue-500" />;
+      case 'Open':
+        return <Package className="w-4 h-4 text-yellow-500" />;
+      case 'Delivered':
+        return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const handleOrderDetails = (orderId) => {
+    navigate(`order/${orderId}`);
+  };
+
+  const renderOrderList = (orders) => {
+    return orders.map((order) => (
+      <div 
+        key={order.id} 
+        className="flex md:flex-row items-start md:items-center justify-between p-2 border-b last:border-b-0 hover:bg-gray-50 border-2 border-gray-100 rounded-md my-1"
+      >
+        <div className="flex items-center space-x-2 mb-1 md:mb-0">
+          {renderStatusIcon(order.status)}
+          <div>
+            <p className="font-semibold text-sm">{order.id}</p>
+            <p className="text-xs text-gray-500">{order.date}</p>
+          </div>
+        </div>
+        <div className="flex items-end md:items-center space-x-2">
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Items: {order.totalItems}</p>
+            <p className="font-semibold text-xs text-red-600">${order.total.toFixed(2)}</p>
+          </div>
+          <Button 
+            onClick={() => handleOrderDetails(order.id)}
+            variant="destructive"
+            size="xs"
+            className="bg-red-500 hover:bg-red-400 py-1 px-2 h-7 text-xs"
+          >
+            View Details
+          </Button>
+        </div>
+      </div>
+    ));
+  };
 
   return (
-    <div className="p-2 sm:p-4">
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-3 sm:p-4">
-        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-700">
-          Rider Orders
-        </h2>
-        <Table className="border border-gray-200 rounded-lg overflow-hidden text-sm sm:text-base">
-          
-          <TableHeader>
-            <TableRow className="bg-gray-100">
-              <TableHead className="w-[100px] text-gray-600 text-left">
-                Order ID
-              </TableHead>
-              <TableHead className="text-gray-600 text-center">Date</TableHead>
-              <TableHead className="text-gray-600 text-center">Status</TableHead>
-              <TableHead className="text-gray-600 text-center">QTY</TableHead>
-              <TableHead className="text-gray-600 text-right">Amount</TableHead>
-              <TableHead className="text-gray-600 text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[1, 2, 3, 4, 5].map((num) => (
-              <TableRow key={num} className="hover:bg-gray-50 transition-all">
-                <TableCell className="font-medium text-left">INV00{num}</TableCell>
-                <TableCell className="text-center">22/02/2025</TableCell>
-                <TableCell className="text-center">
-                  <span className="px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs sm:text-sm">
-                    delivered
-                  </span>
-                </TableCell>
-                <TableCell className="text-center">{10 + num}</TableCell>
-                <TableCell className="text-right">${250 + num * 10}.00</TableCell>
-                <TableCell className="text-right">
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm sm:text-base"
-                    onClick={() => navigate(`order/INV00${num}`)}
-                  >
-                    View Details
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+    <div className="container mx-auto p-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Active Orders Section */}
+        <Card className="order-1 md:order-1 py-0 gap-0">
+          <CardHeader className="p-3">
+            <CardTitle className="text-lg font-bold">Recent Orders</CardTitle>
+          </CardHeader>
+          <CardContent className="p-2">
+            {renderOrderList(orderData.activeOrders)}
+          </CardContent>
+        </Card>
+
+        {/* Delivered Orders Section */}
+        <Card className="order-2 md:order-2 py-0 gap-0">
+          <CardHeader className="p-3">
+            <CardTitle className="text-lg font-bold">Delivered Orders</CardTitle>
+          </CardHeader>
+          <CardContent className="p-2">
+            {renderOrderList(orderData.deliveredOrders)}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
+};
 
 export default Rider;
