@@ -137,7 +137,7 @@ const Manager = () => {
   };
 
   return (
-    <div className="container mx-auto p-2">
+    <div className="container mx-auto p-2 py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {/* Active Orders Section */}
         <Card className="order-1 md:order-1 py-0 gap-0">
