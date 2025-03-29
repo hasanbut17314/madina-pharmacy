@@ -1,29 +1,28 @@
 import React from 'react'
 import { LogOut } from 'lucide-react'
+import { Button } from '../ui/button'
 
 const Header = () => {
   return (
-    <header 
+    <header
       className="w-full bg-[#1D3557] text-white 
                  flex items-center justify-between 
-                 px-4 py-2 
-                 md:px-6 lg:px-8 rounded-b-md"
+                 px-4 py-3
+                 md:px-6 lg:px-8"
     >
       {/* Logo/Image Section */}
       <div className="flex items-center">
-        <img 
-          src="logo.webp" 
-          alt="Logo" 
-          className="h-15 w-60 mr-4 rounded-full"
+        <img
+          src="logo.webp"
+          alt="Logo"
+          className="sm:h-14 h-10 mr-4 rounded-full"
         />
         {/* <h1 className="text-lg font-bold text-red-400">Madina Pharmacy</h1> */}
       </div>
 
       {/* Logout Button */}
-      <button 
+      <Button
         className="bg-[#457B9D] text-white 
-                   px-3 py-2 
-                   rounded-md 
                    flex items-center 
                    hover:bg-[#1D4E79] 
                    transition-colors 
@@ -33,9 +32,9 @@ const Header = () => {
           console.log('Logout clicked')
         }}
       >
-        <LogOut className="mr-2 h-5 w-5" />
+        <LogOut className="md:mr-1 h-5 w-5" />
         <span className='hidden md:block'>Logout</span>
-      </button>
+      </Button>
     </header>
   )
 }
