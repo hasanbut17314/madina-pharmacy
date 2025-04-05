@@ -46,6 +46,7 @@ const Header = ({ userRole = null }) => {
       ? navLinks.user
       : navLinks.public;
 
+
   return (
     <header className="w-full bg-[#1D3557] text-white flex items-center justify-between px-4 py-2 md:px-6 lg:px-8 rounded-b-md">
       <div className="flex items-center">

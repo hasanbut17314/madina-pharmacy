@@ -46,10 +46,10 @@ const Footer = () => {
   ]
 
   return (
-    <footer 
+    <footer
       className="bg-[#1D3557] text-white 
                  py-12 px-4 
-                 md:px-6 lg:px-8 rounded-t-md"
+                 md:px-6 lg:px-8"
     >
       <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
         {footerLinks.map((section, index) => (
@@ -58,9 +58,9 @@ const Footer = () => {
               {section.category}
             </h4>
             {section.links.map((link, linkIndex) => (
-              <a 
-                key={linkIndex} 
-                href="#" 
+              <a
+                key={linkIndex}
+                href="#"
                 className="block text-sm text-white/80 
                            hover:text-white 
                            hover:underline 
@@ -73,7 +73,7 @@ const Footer = () => {
           </div>
         ))}
       </div>
-      
+
       {/* Copyright Section */}
       <div className="text-center mt-10 pt-6 border-t border-white/20">
         <p className="text-sm text-white/70">

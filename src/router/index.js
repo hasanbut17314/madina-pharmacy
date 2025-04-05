@@ -1,7 +1,7 @@
-import Layout from "./layout";
+import Layout from "./Layout";
 import router from "./router";
 
-export{
+export {
     Layout,
     router
 }
