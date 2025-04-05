@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { Cart, Home, Shop, Product, Login } from "../pages/general";
+import { Cart, Home, Shop, Product, Login, About, Contact } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
 import { AdminDashboard } from "../pages/admin";
 import { UserProfile } from "../pages/user";
@@ -17,6 +17,8 @@ const router = createBrowserRouter([
       { path: "shop", element: <Shop /> },
       { path: "product/:proId", element: <Product /> },
       { path: "login", element: <Login /> },
+      { path: "about", element: <About /> },
+      { path: "contact", element: <Contact /> },
 
       {
         path: "manager",
