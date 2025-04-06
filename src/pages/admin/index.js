@@ -1,3 +1,4 @@
 import AdminDashboard from "./AdminDashboard"
-
-export {AdminDashboard}
+import Products from "./Products"
+import Category from "./Category"
+export { AdminDashboard, Products, Category }
