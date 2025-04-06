@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay"
 
 // Placeholder data (you'd typically fetch this from an API)
 const banners = [
@@ -98,7 +99,16 @@ const Home = () => {
     <div className="min-h-screen font-serif">
       {/* Banner Slider */}
       <section className="mb-6">
-        <Carousel>
+        <Carousel
+          opts={{
+            loop: true,
+          }}
+          plugins={[
+            Autoplay({
+              delay: 2000,
+            }),
+          ]}
+        >
           <CarouselContent>
             {banners.map((banner) => (
               <CarouselItem key={banner.id}>
