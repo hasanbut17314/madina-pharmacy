@@ -9,7 +9,7 @@ import {
   Contact,
 } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
-import { AdminDashboard, Products, Category } from "../pages/admin";
+import { AdminDashboard, Products, Category, AdminOrders } from "../pages/admin";
 import { UserProfile } from "../pages/user";
 import { Rider, RiderOrders } from "../pages/rider";
 import { Layout } from ".";
