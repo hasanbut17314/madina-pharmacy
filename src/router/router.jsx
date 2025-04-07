@@ -1,7 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
-import { Cart, Home, Shop, Product, Login, About, Contact } from "../pages/general";
+import {
+  Cart,
+  Home,
+  Shop,
+  Product,
+  Login,
+  About,
+  Contact,
+} from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
-import { AdminDashboard, AdminOrders } from "../pages/admin";
+import { AdminDashboard, Products, Category } from "../pages/admin";
 import { UserProfile } from "../pages/user";
 import { Rider, RiderOrders } from "../pages/rider";
 import { Layout } from ".";
@@ -31,6 +39,9 @@ const router = createBrowserRouter([
         path: "admin",
         children: [
           { index: true, element: <AdminDashboard /> },
+          // { path: "orders", element: <AdminOrders /> },
+          { path: "products", element: <Products /> },
+          { path: "category", element: <Category /> },
           { path: "orders", element: <AdminOrders /> },
           // { path: "users", element: <AdminUsers /> }, add other routes here
         ],
