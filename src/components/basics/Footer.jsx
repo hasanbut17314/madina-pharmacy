@@ -47,7 +47,7 @@ const Footer = () => {
 
   return (
     <footer
-      className="bg-[#1D3557] text-white 
+      className="bg-[#081c3b] text-white 
                  py-12 px-4 
                  md:px-6 lg:px-8"
     >
