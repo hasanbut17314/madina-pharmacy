@@ -1,5 +1,5 @@
 import Header from './Header';
 import Footer from './Footer';
 import ScrollToTop from './Scroll';
-
-export { Header, Footer, ScrollToTop };
+import SideBar from './SideBar';
+export { Header, Footer, ScrollToTop, SideBar };
