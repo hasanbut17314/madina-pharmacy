@@ -5,18 +5,22 @@ import { Outlet, useLocation } from "react-router-dom";
 function Layout() {
   const location = useLocation();
 
-  // List of route prefixes where the Footer should not be shown
-  const hideFooterRoutes = ["/admin"];
+  // Routes where we don't want nav links in the header
+  const hideNavLinkRoutes = ["/admin", "/manager", "/rider"];
 
-  // Check if the current path starts with any of the hideFooterRoutes
-  const shouldHideFooter = hideFooterRoutes.some(route =>
+  const showNavLinks = !hideNavLinkRoutes.some((route) =>
+    location.pathname.startsWith(route)
+  );
+
+  const hideFooterRoutes = ["/admin"];
+  const shouldHideFooter = hideFooterRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
   return (
     <>
       <ScrollToTop />
-      <Header />
+      <Header showNavLinks={showNavLinks} />
       <Outlet />
       {!shouldHideFooter && <Footer />}
     </>
