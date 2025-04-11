@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronRight, ShoppingCart, Star, Plus, Minus } from "lucide-react";
+import { ChevronRight, ShoppingCart, Plus, Minus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay"
+import Autoplay from "embla-carousel-autoplay";
 
 // Placeholder data (you'd typically fetch this from an API)
 const banners = [
@@ -20,7 +20,12 @@ const banners = [
   },
   {
     id: 2,
-    image: "banner1.png",
+    image: "2.jpg",
+    alt: "New Wellness Products",
+  },
+  {
+    id: 3,
+    image: "3.jpg",
     alt: "New Wellness Products",
   },
 ];
@@ -130,7 +135,7 @@ const Home = () => {
       {/* Featured Products */}
       <section className="px-4 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-gray-800">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-800 underline">
             Featured Products
           </h2>
           <Button variant="link" className="text-red-600 text-sm">
@@ -139,7 +144,10 @@ const Home = () => {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
           {featuredProducts.map((product) => (
-            <Card key={product.id} className="border border-gray-100 py-0">
+            <Card
+              key={product.id}
+              className="border border-gray-100 py-0 shadow shadow-gray-200 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-300 ease-in-out"
+            >
               <CardContent className="p-1 md:p-2 text-center">
                 <div className="relative">
                   <img
@@ -186,14 +194,14 @@ const Home = () => {
 
       {/* Brands Section */}
       <section className="px-4 mb-6">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 underline">
           Our Trusted Brands
         </h2>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
           {brands.map((brand) => (
             <Card
               key={brand.id}
-              className="flex justify-center items-center p-2 md:p-3 hover:shadow-md transition-shadow border border-gray-200"
+              className="flex justify-center items-center p-2 md:p-3 rounded-md cursor-pointer bg-gray-50 hover:shadow-md transition-shadow border border-gray-200"
             >
               <img
                 src={brand.logo}
