@@ -10,9 +10,11 @@ import {
   LogOut,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const SideBar = ({ children }) => {
-  const [activeLink, setActiveLink] = useState("home");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navItems = [
     { id: "home", label: "Dashboard", icon: Home, link: "/admin" },
@@ -35,7 +37,6 @@ const SideBar = ({ children }) => {
       link: "/admin/orders",
     },
   ];
-
   const SidebarContent = ({ mobile = false }) => (
     <div
       className={cn(
@@ -50,20 +51,17 @@ const SideBar = ({ children }) => {
         <nav className="space-y-1 px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.link;
+
             return (
               <Button
                 key={item.id}
                 variant="ghost"
                 className={cn(
                   "w-full justify-start py-2 px-3 text-slate-300 hover:text-slate-50 hover:bg-slate-800",
-                  activeLink === item.id && "bg-slate-800 text-slate-50"
+                  isActive && "bg-slate-800 text-slate-50"
                 )}
-                href={item.link}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveLink(item.link);
-                  document.location = item.link;
-                }}
+                onClick={() => navigate(item.link)}
               >
                 <Icon className="h-5 w-5 mr-3" />
                 {item.label}
@@ -101,14 +99,11 @@ const SideBar = ({ children }) => {
         </Sheet>
       </div>
 
-      {/* Desktop Sidebar */}
       <div className="hidden lg:block fixed top-0 left-0 h-screen border-r border-slate-800">
         <SidebarContent />
       </div>
 
-      {/* Main Content Area */}
       <div className="lg:ml-64 min-h-screen">
-        {/* Content Margin for Mobile */}
         <div className="lg:hidden h-14" />
         <main className="p-6">{children}</main>
       </div>
