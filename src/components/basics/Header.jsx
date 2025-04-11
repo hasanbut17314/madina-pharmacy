@@ -82,8 +82,7 @@ const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/user')}>Profile</DropdownMenuItem>
               <DropdownMenuItem className="text-red-500">Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

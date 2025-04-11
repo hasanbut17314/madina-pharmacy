@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,7 +85,7 @@ const SideBar = ({ children }) => {
   return (
     <div className="bg-white min-h-screen">
       {/* Mobile View Header */}
-      <div className="block lg:hidden fixed top-0 left-0 right-0 z-30 bg-slate-950 text-slate-50 px-4 py-3 flex items-center justify-between shadow-md">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-slate-950 text-slate-50 px-4 py-3 flex items-center justify-between shadow-md">
         <h2 className="text-xl font-bold">Admin Panel</h2>
         <Sheet>
           <SheetTrigger asChild>
