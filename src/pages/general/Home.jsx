@@ -10,6 +10,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import ChatbotSection from "../../components/sections/ChatbotSection";
+import FeatureSection from "../../components/sections/FeatureSection";
 
 // Placeholder data (you'd typically fetch this from an API)
 const banners = [
@@ -191,6 +193,12 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {/* Chatbot Section */}
+      <ChatbotSection />
+
+      {/* Features Section */}
+      <FeatureSection />
 
       {/* Brands Section */}
       <section className="px-4 mb-6">
