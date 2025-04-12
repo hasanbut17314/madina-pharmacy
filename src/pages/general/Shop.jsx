@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/select";
 
 const Shop = () => {
-  // Initial products state
   const [products, setProducts] = useState([
     {
       id: 1,
@@ -58,45 +56,35 @@ const Shop = () => {
     },
   ]);
 
-  // State for filtering
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
 
-  // Get unique categories
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  // Filter products
   const filteredProducts = products.filter(
     (product) =>
-      (selectedCategory === "All" || product.category === selectedCategory) &&
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      selectedCategory === "All" || product.category === selectedCategory
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="w-full max-w-6xl mx-auto mb-6">
-        <CardContent className="pt-6">
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <Label>Search Products</Label>
-              <Input
-                placeholder="Search by product name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label>Filter by Category</Label>
+    <div className="min-h-screen bg-[#f9f6f1] px-2 py-4">
+      <div className="max-w-6xl mx-auto mb-4">
+        <div className="bg-white rounded-md shadow px-4 py-3 border border-[#e2dfdc]">
+          <h2 className="text-base font-serif font-semibold text-[#2c2c2c] mb-2">
+            Browse Products
+          </h2>
+          <div className="flex flex-col md:flex-row md:items-end gap-2">
+            <div className="w-full md:w-64">
+              <Label className="text-xs font-medium text-[#555]">Filter by Category</Label>
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="mt-1 h-8 text-xs">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                    <SelectItem key={category} value={category} className="text-xs">
                       {category}
                     </SelectItem>
                   ))}
@@ -104,36 +92,38 @@ const Shop = () => {
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
         {filteredProducts.length === 0 ? (
-          <div className="col-span-full text-center text-gray-500">
+          <div className="col-span-full text-center text-gray-500 text-sm font-serif">
             No products found.
           </div>
         ) : (
           filteredProducts.map((product) => (
             <Card
               key={product.id}
-              className="hover:shadow-lg transition-shadow"
+              className="bg-white border border-[#e4e4e4] rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              <CardContent className="p-4">
-                <div className="text-sm text-gray-500 mb-4">
-                  <img
-                    src={product.img}
-                    alt={product.name}
-                    className="w-full h-56 object-cover"
-                  />
+              <CardContent className="p-2">
+                <img
+                  src={product.img}
+                  alt={product.name}
+                  className="w-full h-36 object-cover rounded mb-1"
+                />
+                <h3 className="text-sm font-serif font-medium text-[#333] mb-0.5">
+                  {product.name}
+                </h3>
+                <div className="text-[#b33] text-sm font-semibold mb-1">
+                  ${product.price.toFixed(2)}
                 </div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
-                  <span className="text-red-600 font-bold">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-center">
-                  <Button variant="destructive" size="sm">
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-3 border-[#b33] text-[#b33] text-xs hover:bg-[#f7eaea]"
+                  >
                     Add To Cart
                   </Button>
                 </div>
