@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronRight, ShoppingCart, Plus, Minus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,80 +13,44 @@ import Autoplay from "embla-carousel-autoplay";
 import ChatbotSection from "../../components/sections/ChatbotSection";
 import FeatureSection from "../../components/sections/FeatureSection";
 
-// Placeholder data (you'd typically fetch this from an API)
-const banners = [
-  {
-    id: 1,
-    image: "banner1.png",
-    alt: "Summer Health Sale",
-  },
-  {
-    id: 2,
-    image: "2.jpg",
-    alt: "New Wellness Products",
-  },
-  {
-    id: 3,
-    image: "3.jpg",
-    alt: "New Wellness Products",
-  },
-];
+// Fetch data from API
+const fetchProducts = async () => {
+  const response = await fetch("/api/products");
+  const data = await response.json();
+  return data;
+};
 
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Vitamin C Supplement pack",
-    price: 19.99,
-    image: "product1.webp",
-  },
-  {
-    id: 2,
-    name: "Immunity Booster Pack ",
-    price: 29.99,
-    image: "product1.webp",
-  },
-  {
-    id: 3,
-    name: "Herbal Stress Relief pack",
-    price: 15.5,
-    image: "product1.webp",
-  },
-  {
-    id: 4,
-    name: "Omega-360 Fish Oil pack",
-    price: 22.99,
-    image: "product1.webp",
-  },
-  {
-    id: 5,
-    name: "Multivitamin Complex pack",
-    price: 24.5,
-    image: "product1.webp",
-  },
-  {
-    id: 6,
-    name: "Probiotic Supplement pack",
-    price: 18.75,
-    image: "product1.webp",
-  },
-];
-
-const brands = [
-  { id: 1, name: "Pharma Plus", logo: "abbott.webp" },
-  { id: 2, name: "Wellness Co", logo: "abbott.webp" },
-  { id: 3, name: "Natural Health", logo: "abbott.webp" },
-  { id: 4, name: "Vital Care", logo: "abbott.webp" },
-  { id: 5, name: "Medix", logo: "abbott.webp" },
-  { id: 6, name: "HealthGuard", logo: "abbott.webp" },
-];
+// Mock data for brands
+const fetchBrands = async () => {
+  return [
+    { id: 1, name: "Brand A", logo: "/path/to/logoA.png" },
+    { id: 2, name: "Brand B", logo: "/path/to/logoB.png" },
+    // Add more mock brands as needed
+  ];
+};
 
 const Home = () => {
-  const [quantities, setQuantities] = useState(
-    featuredProducts.reduce((acc, product) => {
-      acc[product.id] = 1;
-      return acc;
-    }, {})
-  );
+  const [products, setProducts] = useState([]);
+  const [quantities, setQuantities] = useState({});
+  const [brands, setBrands] = useState([]);
+
+  useEffect(() => {
+    const fetchAndSetData = async () => {
+      const [productData, brandData] = await Promise.all([
+        fetchProducts(),
+        fetchBrands(),
+      ]);
+      setProducts(productData.filter((product) => product.isFeatured));
+      setQuantities(
+        productData.reduce((acc, product) => {
+          acc[product.id] = 1;
+          return acc;
+        }, {})
+      );
+      setBrands(brandData);
+    };
+    fetchAndSetData();
+  }, []);
 
   const decreaseQuantity = (productId) => {
     setQuantities((prevQuantities) => ({
@@ -117,12 +81,12 @@ const Home = () => {
           ]}
         >
           <CarouselContent>
-            {banners.map((banner) => (
-              <CarouselItem key={banner.id}>
+            {products.map((product) => (
+              <CarouselItem key={product.id}>
                 <div className="relative">
                   <img
-                    src={banner.image}
-                    alt={banner.alt}
+                    src={product.image}
+                    alt={product.name}
                     className="w-full h-[300px] md:h-[500px] object-cover"
                   />
                 </div>
@@ -145,7 +109,7 @@ const Home = () => {
           </Button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {featuredProducts.map((product) => (
+          {products.map((product) => (
             <Card
               key={product.id}
               className="border border-gray-100 py-0 shadow shadow-gray-200 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-300 ease-in-out"

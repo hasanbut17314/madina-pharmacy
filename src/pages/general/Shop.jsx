@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,61 +10,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSelector, useDispatch } from "react-redux";
+import { setSelectedCategory } from "@/store/slices/shopSlice";
+import { useGetProductsForUserQuery } from "@/api/productApi";
 
 const Shop = () => {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Paracetamol",
-      price: 5.99,
-      category: "Medicine",
-      img: "https://picsum.photos/200/300",
-    },
-    {
-      id: 2,
-      name: "Vitamin C Supplement",
-      price: 8.5,
-      category: "Supplements",
-      img: "https://picsum.photos/200/301",
-    },
-    {
-      id: 3,
-      name: "Hand Sanitizer",
-      price: 3.75,
-      category: "Hygiene",
-      img: "https://picsum.photos/200/302",
-    },
-    {
-      id: 4,
-      name: "Multivitamin Tablets",
-      price: 12.99,
-      category: "Supplements",
-      img: "https://picsum.photos/200/303",
-    },
-    {
-      id: 5,
-      name: "Antiseptic Cream",
-      price: 4.5,
-      category: "Medicine",
-      img: "https://picsum.photos/200/304",
-    },
-    {
-      id: 6,
-      name: "Face Mask",
-      price: 2.99,
-      category: "Hygiene",
-      img: "https://picsum.photos/200/305",
-    },
-  ]);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const selectedCategory = useSelector(
+    (state) => state.shop?.selectedCategory || "All"
+  );
+
+  const { data, error, isLoading } = useGetProductsForUserQuery({
+    page: 1,
+    limit: 20,
+    search: "",
+    category: selectedCategory === "All" ? "" : selectedCategory,
+    isFeatured: false,
+  });
+
+  console.log("API response:", data);
+
+  const { data: productsData = {} } = data || {};
+  const products = productsData.products || [];
 
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  const filteredProducts = products.filter(
-    (product) =>
-      selectedCategory === "All" || product.category === selectedCategory
-  );
+  const handleAddToCart = (productId) => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    fetch("/api/cart/add-item", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("Item added to cart");
+        }
+      })
+      .catch((err) => console.log(err));
+  };
 
   return (
     <div className="min-h-screen bg-[#f9f6f1] px-2 py-4">
@@ -74,17 +71,23 @@ const Shop = () => {
           </h2>
           <div className="flex flex-col md:flex-row md:items-end gap-2">
             <div className="w-full md:w-64">
-              <Label className="text-xs font-medium text-[#555]">Filter by Category</Label>
+              <Label className="text-xs font-medium text-[#555]">
+                Filter by Category
+              </Label>
               <Select
                 value={selectedCategory}
-                onValueChange={setSelectedCategory}
+                onValueChange={(value) => dispatch(setSelectedCategory(value))}
               >
                 <SelectTrigger className="mt-1 h-8 text-xs">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="text-xs">
+                    <SelectItem
+                      key={category}
+                      value={category}
+                      className="text-xs"
+                    >
                       {category}
                     </SelectItem>
                   ))}
@@ -96,12 +99,20 @@ const Shop = () => {
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-        {filteredProducts.length === 0 ? (
+        {isLoading ? (
+          <div className="col-span-full text-center text-gray-500 text-sm font-serif">
+            Loading...
+          </div>
+        ) : error ? (
+          <div className="col-span-full text-center text-red-500 text-sm font-serif">
+            Failed to fetch products.
+          </div>
+        ) : products.length === 0 ? (
           <div className="col-span-full text-center text-gray-500 text-sm font-serif">
             No products found.
           </div>
         ) : (
-          filteredProducts.map((product) => (
+          products.map((product) => (
             <Card
               key={product.id}
               className="bg-white border border-[#e4e4e4] rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -123,6 +134,7 @@ const Shop = () => {
                     variant="outline"
                     size="sm"
                     className="h-7 px-3 border-[#b33] text-[#b33] text-xs hover:bg-[#f7eaea]"
+                    onClick={() => handleAddToCart(product.id)}
                   >
                     Add To Cart
                   </Button>
