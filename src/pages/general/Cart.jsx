@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -9,9 +10,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2, PlusCircle } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 const Cart = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const [cartItems, setCartItems] = useState([
     { id: 1, name: "Paracetamol", price: 5.99, quantity: 2 },
     { id: 2, name: "Vitamin C Supplement", price: 8.5, quantity: 1 },
@@ -19,17 +29,14 @@ const Cart = () => {
     { id: 4, name: "Multivitamin Tablets", price: 12.99, quantity: 1 },
   ]);
 
-  // Calculate grand total
   const grandTotal = cartItems
     .reduce((total, item) => total + item.price * item.quantity, 0)
     .toFixed(2);
 
-  // Function to remove item from cart
   const removeFromCart = (itemId) => {
     setCartItems(cartItems.filter((item) => item.id !== itemId));
   };
 
-  // Function to update quantity
   const updateQuantity = (itemId, newQuantity) => {
     setCartItems(
       cartItems.map((item) =>

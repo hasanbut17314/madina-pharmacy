@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, ShoppingCart, User } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { LogOut, Menu, ShoppingCart, User } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,26 +10,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useLogoutMutation } from "@/api/authApi";
+import { logout } from "@/store/slices/authSlice";
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // RTK Query hook for logout
+  const [logoutUser, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const restrictedRoutes = ["/admin", "/manager", "/rider"];
-  const shouldShowNavElements = !restrictedRoutes.some(route =>
+  const shouldShowNavElements = !restrictedRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
-  const isRiderOrManager = ['/rider', '/manager'].includes(location.pathname);
+  const isRiderOrManager = ["/rider", "/manager"].includes(location.pathname);
 
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Shop', href: '/shop' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+    { name: "Home", href: "/" },
+    { name: "Shop", href: "/shop" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ];
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      // Call the logout API
+      await logoutUser().unwrap();
+    } catch (error) {
+      console.error("Logout API error:", error);
+    } finally {
+      // Regardless of API success/failure, clear local state
+      dispatch(logout());
+      localStorage.removeItem("user"); // Remove user data from localStorage
+      navigate("/login"); // Redirect to login page
+    }
+  };
 
   return (
     <header className="w-full bg-[#081c3b] text-white flex items-center justify-between px-4 py-2">
@@ -73,7 +91,7 @@ const Header = () => {
               className="px-3 py-1.5 rounded-md bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#A8DADC] w-64"
             />
             <button
-              onClick={() => console.log('Search:', searchQuery)}
+              onClick={() => console.log("Search:", searchQuery)}
               className="absolute right-2 text-[#1D3557] hover:text-[#457B9D]"
             >
               🔍
@@ -87,7 +105,7 @@ const Header = () => {
             variant="ghost"
             size="icon"
             className="cursor-pointer text-white hover:bg-[#457B9D] hidden md:inline-flex"
-            onClick={() => navigate('/cart')}
+            onClick={() => navigate("/cart")}
           >
             <ShoppingCart className="h-5 w-5" />
           </Button>
@@ -97,13 +115,25 @@ const Header = () => {
         {shouldShowNavElements && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-[#457B9D] hidden md:inline-flex">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-[#457B9D] hidden md:inline-flex"
+              >
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/user')}>Profile</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-500">Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/user")}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-500"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -113,10 +143,11 @@ const Header = () => {
           <Button
             variant="secondary"
             className="bg-[#457B9D] text-white hover:bg-[#1D4E79] hidden md:flex"
-            onClick={() => console.log('Logout clicked')}
+            onClick={handleLogout}
+            disabled={isLoggingOut}
           >
             <LogOut className="mr-2 h-5 w-5" />
-            <span>Logout</span>
+            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
           </Button>
         )}
 
@@ -124,7 +155,11 @@ const Header = () => {
         {!isRiderOrManager && (
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-[#457B9D] md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-[#457B9D] md:hidden"
+              >
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
@@ -147,7 +182,7 @@ const Header = () => {
                     />
                     <button
                       onClick={() => {
-                        console.log('Search:', searchQuery);
+                        console.log("Search:", searchQuery);
                         setIsSheetOpen(false);
                       }}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1D3557] hover:text-[#457B9D]"
@@ -176,18 +211,33 @@ const Header = () => {
                 </nav>
               )}
 
+              {/* User Profile Link in Drawer */}
+              {shouldShowNavElements && (
+                <span
+                  onClick={() => {
+                    navigate("/user");
+                    setIsSheetOpen(false);
+                  }}
+                  className="cursor-pointer px-4 py-2 rounded-md hover:bg-[#F1FAEE] hover:text-[#457B9D] text-[#1D3557] font-medium transition-all duration-200 flex items-center mt-3"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </span>
+              )}
+
               {/* Logout in Drawer */}
               {!isRiderOrManager && (
                 <Button
                   variant="secondary"
                   className="bg-[#457B9D] text-white hover:bg-[#1D4E79] w-full mt-6 rounded-md"
                   onClick={() => {
-                    console.log('Logout clicked');
+                    handleLogout();
                     setIsSheetOpen(false);
                   }}
+                  disabled={isLoggingOut}
                 >
                   <LogOut className="mr-2 h-5 w-5" />
-                  <span>Logout</span>
+                  <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
                 </Button>
               )}
             </SheetContent>
@@ -199,10 +249,11 @@ const Header = () => {
           <Button
             variant="secondary"
             className="bg-[#457B9D] text-white hover:bg-[#1D4E79] w-full mt-0 rounded-md"
-            onClick={() => console.log('Logout clicked')}
+            onClick={handleLogout}
+            disabled={isLoggingOut}
           >
             <LogOut className="mr-2 h-5 w-5" />
-            <span>Logout</span>
+            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
           </Button>
         )}
       </div>
