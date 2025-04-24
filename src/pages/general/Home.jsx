@@ -81,17 +81,19 @@ const Home = () => {
           ]}
         >
           <CarouselContent>
-            {products.map((product) => (
-              <CarouselItem key={product.id}>
-                <div className="relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-[300px] md:h-[500px] object-cover"
-                  />
-                </div>
-              </CarouselItem>
-            ))}
+            {["/public/2.jpg", "/public/banner1.png", "/public/3.jpg"].map(
+              (image, index) => (
+                <CarouselItem key={index}>
+                  <div className="relative">
+                    <img
+                      src={image}
+                      alt={`Carousel ${index}`}
+                      className="w-full h-[300px] md:h-[500px] object-cover"
+                    />
+                  </div>
+                </CarouselItem>
+              )
+            )}
           </CarouselContent>
           <CarouselPrevious className="left-4 z-20 bg-white/20 hover:bg-white/30" />
           <CarouselNext className="right-4 z-20 bg-white/20 hover:bg-white/30" />
