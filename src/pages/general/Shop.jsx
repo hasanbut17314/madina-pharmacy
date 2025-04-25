@@ -13,6 +13,8 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedCategory } from "@/store/slices/shopSlice";
 import { useGetProductsForUserQuery } from "@/api/productApi";
+import { useAddItemToCartMutation } from "@/api/CartApi";
+import { addToCart } from "@/store/slices/cartSlice";
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -30,36 +32,30 @@ const Shop = () => {
     isFeatured: false,
   });
 
-  console.log("API response:", data);
+  const [addItemToCart, { isLoading: isAddingToCart }] =
+    useAddItemToCartMutation();
 
   const { data: productsData = {} } = data || {};
   const products = productsData.products || [];
 
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  const handleAddToCart = (productId) => {
+  const handleAddToCart = async (product) => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       navigate("/login");
       return;
     }
 
-    fetch("/api/cart/add-item", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        productId,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          console.log("Item added to cart");
-        }
-      })
-      .catch((err) => console.log(err));
+    try {
+      // Call the API to add the item to cart
+      await addItemToCart(product._id).unwrap();
+
+      // Update the Redux store
+      dispatch(addToCart({ product, quantity: 1 }));
+    } catch (error) {
+      console.error("Failed to add item to cart:", error);
+    }
   };
 
   return (
@@ -134,9 +130,10 @@ const Shop = () => {
                     variant="outline"
                     size="sm"
                     className="h-7 px-3 border-[#b33] text-[#b33] text-xs hover:bg-[#f7eaea]"
-                    onClick={() => handleAddToCart(product.id)}
+                    onClick={() => handleAddToCart(product)}
+                    disabled={isAddingToCart}
                   >
-                    Add To Cart
+                    {isAddingToCart ? "Adding..." : "Add To Cart"}
                   </Button>
                 </div>
               </CardContent>
