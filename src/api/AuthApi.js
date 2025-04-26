@@ -4,14 +4,14 @@ export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
   endpoints: (builder) => ({
-    register: builder.mutation({ // when call this mutation then send data like this {firstName lastName email password confirmPassword}
+    register: builder.mutation({
       query: (userData) => ({
         url: "/user/register",
         method: "POST",
         body: userData,
       }),
     }),
-    login: builder.mutation({ // when call this mutation then send data like this {email password}
+    login: builder.mutation({
       query: (credentials) => ({
         url: "/user/login",
         method: "POST",
@@ -24,7 +24,7 @@ export const authApi = createApi({
         method: "POST",
       }),
     }),
-    updateUser: builder.mutation({ // when call this mutation then send data like this {firstName lastName email}
+    updateUser: builder.mutation({
       query: (userData) => ({
         url: "/user/update",
         method: "PUT",
@@ -37,6 +37,15 @@ export const authApi = createApi({
         method: "POST",
       }),
     }),
+    
+    // 🔥 New added endpoint: getAllUsers
+    getAllUsers: builder.query({
+      query: ({ page = 1, limit = 10, search = '', role = '' } = {}) => ({
+        url: `/user/getAllUsers?page=${page}&limit=${limit}&search=${search}&role=${role}`,
+        method: "GET",
+      }),
+    }),
+
   }),
 });
 
@@ -46,4 +55,5 @@ export const {
   useLogoutMutation,
   useUpdateUserMutation,
   useRecreateAccessTokenMutation,
+  useGetAllUsersQuery, // <-- export the new hook
 } = authApi;

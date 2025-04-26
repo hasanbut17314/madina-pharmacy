@@ -2,91 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, Clock, CheckCircle2, Truck } from 'lucide-react';
-
-// Sample order data
-const orderData = {
-  activeOrders: [
-    {
-      id: 'ORD-001',
-      date: 'March 20',
-      status: 'Processing',
-      totalItems: 2,
-      total: 32.99,
-      customerName: 'John Doe',
-      address: '123 Main St, Cityville'
-    },
-    {
-      id: 'ORD-002',
-      date: 'March 19',
-      status: 'Open',
-      totalItems: 1,
-      total: 45.50,
-      customerName: 'Jane Smith',
-      address: '456 Elm St, Townsburg'
-    },
-    {
-      id: 'ORD-007',
-      date: 'March 19',
-      status: 'Open',
-      totalItems: 1,
-      total: 45.50,
-      customerName: 'Jane Smith',
-      address: '456 Elm St, Townsburg'
-    },
-    {
-      id: 'ORD-008',
-      date: 'March 19',
-      status: 'Processing',
-      totalItems: 1,
-      total: 45.50,
-      customerName: 'Jane Smith',
-      address: '456 Elm St, Townsburg'
-    }
-  ],
-  deliveredOrders: [
-    {
-      id: 'ORD-003',
-      date: 'March 15',
-      status: 'Delivered',
-      totalItems: 3,
-      total: 22.75,
-      customerName: 'Alice Johnson',
-      address: '789 Oak Rd, Villagetown'
-    },
-    {
-      id: 'ORD-004',
-      date: 'March 10',
-      status: 'Delivered',
-      totalItems: 1,
-      total: 15.99,
-      customerName: 'Bob Williams',
-      address: '101 Pine Lane, Hamletville'
-    },
-    {
-      id: 'ORD-005',
-      date: 'March 10',
-      status: 'Delivered',
-      totalItems: 1,
-      total: 15.99,
-      customerName: 'Bob Williams',
-      address: '101 Pine Lane, Hamletville'
-    },
-    {
-      id: 'ORD-006',
-      date: 'March 10',
-      status: 'Delivered',
-      totalItems: 1,
-      total: 15.99,
-      customerName: 'Bob Williams',
-      address: '101 Pine Lane, Hamletville'
-    }
-  ]
-};
+import { Package, Clock, CheckCircle2 } from 'lucide-react';
+import { useGetAllOrdersQuery } from '../../api/OrderApi'; // Adjust if needed
 
 const Manager = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('active');
+  const [page, setPage] = useState(1); // Pagination state
+  const limit = 10; // Number of orders per page
+
+  // Fetch orders from API
+  const { data, isLoading, isError } = useGetAllOrdersQuery({ page, limit });
 
   const renderStatusIcon = (status) => {
     switch (status) {
@@ -105,60 +30,101 @@ const Manager = () => {
     navigate(`order/${orderId}`);
   };
 
-  const renderOrderList = (orders) => {
-    return orders.map((order) => (
-      <div 
-        key={order.id} 
-        className="flex md:flex-row items-start md:items-center justify-between p-2 border-b last:border-b-0 hover:bg-gray-50 border-2 border-gray-100 rounded-md my-1"
-      >
-        <div className="flex items-center space-x-2 mb-1 md:mb-0">
-          {renderStatusIcon(order.status)}
-          <div>
-            <p className="font-semibold text-sm">{order.id}</p>
-            <p className="text-xs text-gray-500">{order.date}</p>
-          </div>
-        </div>
-        <div className="flex items-end md:items-center space-x-2">
-          <div className="text-right">
-            <p className="text-xs text-gray-500">Items: {order.totalItems}</p>
-            <p className="font-semibold text-xs text-red-600">${order.total.toFixed(2)}</p>
-          </div>
-          <Button 
-            onClick={() => handleOrderDetails(order.id)}
-            variant="destructive"
-            size="xs"
-            className="bg-red-500 hover:bg-red-400 py-1 px-2 h-7 text-xs"
-          >
-            View Details
-          </Button>
-        </div>
-      </div>
-    ));
+  const handlePrevPage = () => {
+    if (page > 1) setPage((prev) => prev - 1);
   };
+
+  const handleNextPage = () => {
+    if (data?.data?.totalPages && page < data.data.totalPages) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-60">Loading orders...</div>;
+  }
+
+  if (isError) {
+    return <div className="flex justify-center items-center h-60 text-red-500">Failed to load orders.</div>;
+  }
 
   return (
     <div className="container mx-auto p-2 py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {/* Active Orders Section */}
-        <Card className="order-1 md:order-1 py-0 gap-0">
-          <CardHeader className="p-3">
-            <CardTitle className="text-lg font-bold">Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent className="p-2">
-            {renderOrderList(orderData.activeOrders)}
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">All Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Orders Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left bg-gray-100">
+                  <th className="p-2">Order</th>
+                  <th className="p-2">Date</th>
+                  <th className="p-2">Items</th>
+                  <th className="p-2">Total</th>
+                  <th className="p-2">Status</th>
+                  <th className="p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.data?.orders?.length > 0 ? (
+                  data.data.orders.map((order) => (
+                    <tr key={order._id} className="border-b hover:bg-gray-50">
+                      <td className="p-2 font-semibold">{order.order_no || order._id}</td>
+                      <td className="p-2">{new Date(order.createdAt).toLocaleDateString()}</td>
+                      <td className="p-2">{order.orderItems?.length || 0}</td>
+                      <td className="p-2">${order.totalPrice?.toFixed(2)}</td>
+                      <td className="p-2 flex items-center space-x-1">
+                        {renderStatusIcon(order.status)}
+                        <span>{order.status}</span>
+                      </td>
+                      <td className="p-2">
+                        <Button 
+                          onClick={() => handleOrderDetails(order._id)}
+                          variant="destructive"
+                          size="xs"
+                          className="bg-red-500 hover:bg-red-400 py-1 px-2 h-7 text-xs"
+                        >
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center p-4 text-gray-500">
+                      No orders found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Delivered Orders Section */}
-        <Card className="order-2 md:order-2 py-0 gap-0">
-          <CardHeader className="p-3">
-            <CardTitle className="text-lg font-bold">Delivered Orders</CardTitle>
-          </CardHeader>
-          <CardContent className="p-2">
-            {renderOrderList(orderData.deliveredOrders)}
-          </CardContent>
-        </Card>
-      </div>
+          {/* Pagination Buttons */}
+          <div className="flex justify-between items-center mt-4">
+            <Button 
+              onClick={handlePrevPage}
+              disabled={page === 1}
+              size="sm"
+              className="bg-gray-700 hover:bg-gray-600 text-white"
+            >
+              Previous
+            </Button>
+            <span className="text-sm">Page {page} of {data?.data?.totalPages || 1}</span>
+            <Button 
+              onClick={handleNextPage}
+              disabled={page === (data?.data?.totalPages || 1)}
+              size="sm"
+              className="bg-gray-700 hover:bg-gray-600 text-white"
+            >
+              Next
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
