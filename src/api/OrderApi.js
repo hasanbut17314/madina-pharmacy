@@ -37,6 +37,30 @@ export const orderApi = createApi({
       query: ({ page = 1, limit = 10, status = "" }) =>
         `/order/getAllOrders?page=${page}&limit=${limit}&status=${status}`,
     }),
+
+    // Assign rider to order
+    assignRider: builder.mutation({
+      query: ({ orderId, riderId }) => ({
+        url: "/order/assign",
+        method: "POST",
+        body: { orderId, riderId },
+      }),
+    }),
+
+    // Get orders assigned to a specific rider
+    getRiderOrders: builder.query({
+      query: ({ page = 1, limit = 10, status = "" }) =>
+        `/order/rider/getOrders?page=${page}&limit=${limit}&status=${status}`,
+    }),
+
+    // 🚀 Corrected: Update order status by Rider (send status in body)
+    updateOrderStatusByRider: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/order/rider/${id}/updateStatus`,
+        method: "PUT",
+        body: { status },
+      }),
+    }),
   }),
 });
 
@@ -45,5 +69,8 @@ export const {
   useGetUserOrdersQuery,
   useGetOrderByIdQuery,
   useCancelOrderMutation,
-  useGetAllOrdersQuery, // 👈 New hook for all orders
+  useGetAllOrdersQuery,
+  useAssignRiderMutation,
+  useGetRiderOrdersQuery,
+  useUpdateOrderStatusByRiderMutation,
 } = orderApi;

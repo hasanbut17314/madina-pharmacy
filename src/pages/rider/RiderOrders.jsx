@@ -1,87 +1,42 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Clock, CheckCircle2 } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useGetRiderOrdersQuery, useUpdateOrderStatusByRiderMutation } from '../../api/OrderApi';
+import { ArrowLeft, Clock } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { CheckCircle2 } from 'lucide-react';
 
-const orderDetails = {
-  'ORD-001': {
-    id: 'ORD-001',
-    date: 'March 20, 2024',
-    status: 'Processing',
-    customerName: 'John Doe',
-    customerEmail: 'john.doe@example.com',
-    customerPhone: '+1 (555) 123-4567',
-    deliveryAddress: '123 Main St, Cityville, State 12345',
-    items: [
-      { 
-        name: 'Amoxicillin', 
-        quantity: 1, 
-        dosage: '500mg', 
-        price: 15.99,
-        description: 'Broad-spectrum antibiotic'
-      },
-      { 
-        name: 'Ibuprofen', 
-        quantity: 2, 
-        dosage: '200mg', 
-        price: 8.50,
-        description: 'Non-steroidal anti-inflammatory'
-      },
-      { 
-        name: 'Paracetamol', 
-        quantity: 1, 
-        dosage: '500mg', 
-        price: 5.99,
-        description: 'Pain and fever medication'
-      },
-      { 
-        name: 'Vitamin C', 
-        quantity: 3, 
-        dosage: '1000mg', 
-        price: 7.50,
-        description: 'Immune system support'
-      }
-    ],
-    subtotal: 32.99,
-    deliveryFee: 5.00,
-    total: 37.99,
-    isDelivered: false
-  }
-};
-
-const RiderOrders = ({ 
-  orderId = 'ORD-001', 
-  onBack, 
-  orderData = orderDetails 
-}) => {
-  const [order, setOrder] = useState(orderData[orderId]);
+const RiderOrder = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const { data, isLoading, isError } = useGetRiderOrdersQuery({ page: 1, limit: 10 });
+  const [updateOrderStatus, { isLoading: isUpdating, isSuccess }] = useUpdateOrderStatusByRiderMutation();
   const [showDeliveryAlert, setShowDeliveryAlert] = useState(false);
 
-  const handleMarkDelivered = () => {
-    setOrder(prevOrder => ({
-      ...prevOrder,
-      status: 'Delivered',
-      isDelivered: true
-    }));
-    setShowDeliveryAlert(true);
-    
-    // Hide alert after 3 seconds
-    setTimeout(() => {
-      setShowDeliveryAlert(false);
-    }, 3000);
+  // Find the order matching the orderId
+  const order = data?.data?.orders.find((order) => order._id === orderId);
+
+  // Handle Mark as Delivered API Call
+  const handleMarkDelivered = async () => {
+    try {
+      await updateOrderStatus({ id: order._id, status: 'Delivered' }).unwrap();
+      setShowDeliveryAlert(true);
+      setTimeout(() => setShowDeliveryAlert(false), 3000); // Show alert for a few seconds
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+    }
   };
 
-  if (!order) {
-    return <div className="container mx-auto p-4">Order not found</div>;
-  }
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isError || !order) return <div className="p-4 text-red-600">Failed to fetch order.</div>;
 
   return (
     <div className="container mx-auto max-w-5xl md:max-w-3xl px-4 py-6">
-      {/* Navigation */}
+      {/* Back Button */}
       <div className="flex justify-between items-center mb-4">
         <button 
-          onClick={onBack}
+          onClick={() => navigate(-1)}
           className="flex items-center text-sm text-gray-600 hover:text-gray-800 transition-colors"
         >
           <ArrowLeft className="mr-1.5 h-4 w-4" />
@@ -93,111 +48,92 @@ const RiderOrders = ({
         </div>
       </div>
 
-      {/* Delivery Alert */}
+      {/* Delivery Success Alert */}
       {showDeliveryAlert && (
         <div className="mb-4">
           <Alert>
-            <CheckCircle2 className="h-4 w-4" />
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
             <AlertTitle>Order Delivered</AlertTitle>
             <AlertDescription>
-              Order #{order.id} has been successfully marked as delivered.
+              Order #{order.order_no} has been successfully marked as delivered.
             </AlertDescription>
           </Alert>
         </div>
       )}
 
-      {/* Main Content */}
+      {/* Order Details Card */}
       <div className="bg-white border rounded-lg overflow-hidden">
-        {/* Header */}
+        {/* Order Header */}
         <div className="bg-gray-50 px-4 py-3 border-b">
-          <h1 className="text-base font-bold text-gray-800">
-            Order #{order.id}
-          </h1>
+          <h1 className="text-base font-bold text-gray-800">Order #{order.order_no}</h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Placed on {order.date}
+            Placed on {new Date(order.createdAt).toLocaleDateString()}
           </p>
         </div>
 
-        {/* Content Grid */}
         <div className="grid md:grid-cols-2 gap-4 p-4">
-          {/* Customer Information */}
+          {/* Customer Info */}
           <div>
-            <h2 className="text-sm font-semibold mb-2 text-gray-700">
-              Customer Details
-            </h2>
+            <h2 className="text-sm font-semibold mb-2 text-gray-700">Customer Details</h2>
             <div className="space-y-2 bg-gray-50 p-3 rounded-lg border">
               <div>
                 <p className="text-[10px] text-gray-500">Name</p>
-                <p className="text-xs font-medium">{order.customerName}</p>
+                <p className="text-xs font-medium">
+                  {order.userId?.firstName} {order.userId?.lastName}
+                </p>
               </div>
               <div>
                 <p className="text-[10px] text-gray-500">Phone</p>
-                <p className="text-xs">{order.customerPhone}</p>
+                <p className="text-xs">{order.contactNumber}</p>
               </div>
               <div>
                 <p className="text-[10px] text-gray-500">Delivery Address</p>
-                <p className="text-xs">{order.deliveryAddress}</p>
+                <p className="text-xs">{order.address}</p>
               </div>
             </div>
           </div>
 
           {/* Order Items */}
           <div>
-            <h2 className="text-sm font-semibold mb-2 text-gray-700">
-              Order Items
-            </h2>
-            {/* Scrollable Area */}
+            <h2 className="text-sm font-semibold mb-2 text-gray-700">Order Items</h2>
             <ScrollArea className="h-48 border rounded-lg">
               <div className="space-y-3 p-1 pr-4">
-                {order.items.map((item, index) => (
-                  <div 
-                    key={index} 
-                    className="bg-gray-50 rounded-lg p-3 border flex justify-between items-start"
-                  >
+                {order.orderItems.map((item, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-3 border flex justify-between items-start">
                     <div>
                       <h3 className="text-xs font-medium text-gray-800">
-                        {item.name}
+                        {item.prodId?.name || item.name}
                       </h3>
-                      <p className="text-[10px] text-gray-500">
-                        {item.quantity} x {item.dosage}
-                      </p>
+                      <p className="text-[10px] text-gray-500">QTY: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold text-red-600">
-                        ${item.price.toFixed(2)}
-                      </p>
+                      <p className="text-xs font-semibold text-red-600">${item.price.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </ScrollArea>
-
-            {/* Mark as Delivered Button */}
-            {!order.isDelivered && (
-              <Button 
-                onClick={handleMarkDelivered}
-                className="w-full mt-3 bg-green-600 hover:bg-green-700 transition-colors flex items-center justify-center text-xs"
-              >
-                <CheckCircle2 className="mr-1.5 h-3 w-3" />
-                Mark as Delivered
-              </Button>
-            )}
           </div>
         </div>
 
-        {/* Order Summary */}
+        {/* Mark as Delivered Button */}
+        {order.status !== 'Delivered' && (
+          <div className="p-4">
+            <Button 
+              onClick={handleMarkDelivered}
+              className="w-full mt-3 bg-green-600 hover:bg-green-700 transition-colors"
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Updating...' : 'Mark as Delivered'}
+            </Button>
+          </div>
+        )}
+
+        {/* Total Price */}
         <div className="bg-gray-50 px-4 py-3 border-t">
-          <div className="flex justify-between mb-1">
-            <span className="text-xs text-gray-600">Subtotal</span>
-            <span className="text-xs font-medium text-red-600">${order.subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between mb-1">
-            <span className="text-xs text-gray-600">Delivery Fee</span>
-            <span className="text-xs font-medium text-red-600">${order.deliveryFee.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between pt-2 border-t font-bold">
+          <div className="flex justify-between pt-2 font-bold">
             <span className="text-sm text-gray-800">Total</span>
-            <span className="text-sm text-red-600">${order.total.toFixed(2)}</span>
+            <span className="text-sm text-red-600">${order.totalPrice.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -205,4 +141,4 @@ const RiderOrders = ({
   );
 };
 
-export default RiderOrders;
+export default RiderOrder;
