@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { LogOut, Menu, ShoppingCart, User } from "lucide-react";
@@ -20,7 +20,9 @@ const Header = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // RTK Query hook for logout
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const restrictedRoutes = ["/admin", "/manager", "/rider"];
@@ -37,18 +39,28 @@ const Header = () => {
     { name: "Contact", href: "/contact" },
   ];
 
-  // Handle logout
+  // 🛡️ AUTO REDIRECT Handling
+  useEffect(() => {
+    if (!user) {
+      if (restrictedRoutes.some((route) => location.pathname.startsWith(route))) {
+        navigate("/login", { replace: true });
+      }
+    } else {
+      if (location.pathname === "/login") {
+        navigate(`/${user.role}`, { replace: true });
+      }
+    }
+  }, [user, location.pathname, navigate]);
+
   const handleLogout = async () => {
     try {
-      // Call the logout API
       await logoutUser().unwrap();
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
-      // Regardless of API success/failure, clear local state
       dispatch(logout());
-      localStorage.removeItem("user"); // Remove user data from localStorage
-      navigate("/login"); // Redirect to login page
+      localStorage.removeItem("user");
+      navigate("/login");
     }
   };
 
@@ -80,7 +92,6 @@ const Header = () => {
 
       {/* Right Side */}
       <div className="flex items-center space-x-2">
-        {/* Desktop Search Bar */}
         {shouldShowNavElements && (
           <div className="hidden md:flex items-center relative">
             <input
@@ -136,13 +147,13 @@ const Header = () => {
                 onClick={handleLogout}
                 disabled={isLoggingOut}
               >
-                {isLoggingOut ? "Logging out..." : "Logout"}
+                {user ? (isLoggingOut ? "Logging out..." : "Logout") : "Login"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
 
-        {/* Logout Button for Non-Rider/Manager */}
+        {/* Logout Button */}
         {!isRiderOrManager && (
           <Button
             variant="secondary"
@@ -151,7 +162,9 @@ const Header = () => {
             disabled={isLoggingOut}
           >
             <LogOut className="mr-2 h-5 w-5" />
-            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+            <span>
+              {user ? (isLoggingOut ? "Logging out..." : "Logout") : "Login"}
+            </span>
           </Button>
         )}
 
@@ -173,7 +186,6 @@ const Header = () => {
                 <hr className="mt-2 border-[#A8DADC]" />
               </div>
 
-              {/* Stylish Search Bar in Drawer */}
               {shouldShowNavElements && (
                 <div className="mb-6">
                   <div className="relative">
@@ -197,7 +209,6 @@ const Header = () => {
                 </div>
               )}
 
-              {/* Mobile Nav Links */}
               {shouldShowNavElements && (
                 <nav className="flex flex-col space-y-3">
                   {navLinks.map((link) => (
@@ -215,7 +226,6 @@ const Header = () => {
                 </nav>
               )}
 
-              {/* User Profile Link in Drawer */}
               {shouldShowNavElements && (
                 <span
                   onClick={() => {
@@ -229,7 +239,6 @@ const Header = () => {
                 </span>
               )}
 
-              {/* Logout in Drawer */}
               {!isRiderOrManager && (
                 <Button
                   variant="secondary"
@@ -241,14 +250,15 @@ const Header = () => {
                   disabled={isLoggingOut}
                 >
                   <LogOut className="mr-2 h-5 w-5" />
-                  <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                  <span>
+                    {user ? (isLoggingOut ? "Logging out..." : "Logout") : "Login"}
+                  </span>
                 </Button>
               )}
             </SheetContent>
           </Sheet>
         )}
 
-        {/* Logout Button for Rider or Manager */}
         {isRiderOrManager && (
           <Button
             variant="secondary"
@@ -257,7 +267,9 @@ const Header = () => {
             disabled={isLoggingOut}
           >
             <LogOut className="mr-2 h-5 w-5" />
-            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+            <span>
+              {user ? (isLoggingOut ? "Logging out..." : "Logout") : "Login"}
+            </span>
           </Button>
         )}
       </div>

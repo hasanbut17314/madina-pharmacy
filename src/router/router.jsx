@@ -11,15 +11,11 @@ import {
   Orders,
 } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
-import {
-  AdminDashboard,
-  Products,
-  Category,
-  AdminOrders,
-} from "../pages/admin";
+import { AdminDashboard, Products, Category, AdminOrders } from "../pages/admin";
 import { UserProfile } from "../pages/user";
 import { Rider, RiderOrders } from "../pages/rider";
 import { Layout } from ".";
+import ProtectedRoute from "../components/basics/ProtectedRoute"; // 👉 import here
 
 const router = createBrowserRouter([
   {
@@ -34,34 +30,41 @@ const router = createBrowserRouter([
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "checkout", element: <Checkout /> },
-      { path: "orders", element: <Orders /> },
+      // 🔒 Manager Protected Routes
       {
         path: "manager",
+        element: <ProtectedRoute allowedRoles={["manager"]} />,
         children: [
           { index: true, element: <Manager /> },
           { path: "order/:orderId", element: <ManagerOrder /> },
         ],
       },
 
+      // 🔒 Admin Protected Routes
       {
         path: "admin",
+        element: <ProtectedRoute allowedRoles={["admin"]} />,
         children: [
           { index: true, element: <AdminDashboard /> },
-          // { path: "orders", element: <AdminOrders /> },
           { path: "products", element: <Products /> },
           { path: "category", element: <Category /> },
           { path: "orders", element: <AdminOrders /> },
-          // { path: "users", element: <AdminUsers /> }, add other routes here
         ],
       },
 
+      // 🔒 User Protected Routes
       {
         path: "user",
-        children: [{ index: true, element: <UserProfile /> }],
+        element: <ProtectedRoute allowedRoles={["user"]} />,
+        children: [
+          { index: true, element: <UserProfile /> },
+        ],
       },
 
+      // 🔒 Rider Protected Routes
       {
         path: "rider",
+        element: <ProtectedRoute allowedRoles={["rider"]} />,
         children: [
           { index: true, element: <Rider /> },
           { path: "order/:orderId", element: <RiderOrders /> },
