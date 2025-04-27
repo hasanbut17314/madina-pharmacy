@@ -127,6 +127,10 @@ const Header = () => {
               <DropdownMenuItem onClick={() => navigate("/user")}>
                 Profile
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/orders")}>
+                Orders
+              </DropdownMenuItem>
+
               <DropdownMenuItem
                 className="text-red-500"
                 onClick={handleLogout}

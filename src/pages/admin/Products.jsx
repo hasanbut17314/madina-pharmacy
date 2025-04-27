@@ -34,7 +34,7 @@ import {
   useUpdateProductMutation,
   useDeleteProductMutation,
 } from "@/api/productApi";
-import { useGetAllCategoriesQuery } from "@/api/catApi"; // Assuming you have a category API
+import { useGetAllCategoriesQuery } from "@/api/catApi";
 
 const Products = () => {
   // Query parameters
@@ -42,29 +42,24 @@ const Products = () => {
     page: 1,
     limit: 10,
     search: "",
-    category: "", // For filtering - will be handled specially
+    category: "",
   });
 
-  // Query products from Redux
+  // Query products and categories from Redux
   const {
     data: productsData,
     isLoading,
     isError,
     refetch,
   } = useGetAllProductsQuery(queryParams);
-  console.log(productsData?.data?.products);
-  // Query categories
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [search, setSearch] = useState("");
 
   const { data: categoriesData, isLoading: isCategoriesLoading } =
     useGetAllCategoriesQuery({
-      page,
-      limit,
-      search,
+      page: 1,
+      limit: 100,
+      search: "",
     });
-  console.log(categoriesData?.data.categories);
+
   // Mutations from Redux
   const [addProduct, { isLoading: isAdding }] = useAddProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
@@ -74,15 +69,17 @@ const Products = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
-  const [mode, setMode] = useState("add"); // "add" or "edit"
+  const [mode, setMode] = useState("add");
 
   // Form state
   const [formData, setFormData] = useState({
     name: "",
-    category: "", // This will hold the ObjectId of the category
-    isFeature: true,
-    image: "",
+    category: "",
+    isFeatured: false,
+    isActive: true,
+    image: null,
     quantity: 0,
+    price: 0,
   });
 
   const handleInputChange = (e) => {
@@ -93,18 +90,27 @@ const Products = () => {
     });
   };
 
-  const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value) || 0;
+  const handleNumericChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      quantity: value,
+      [name]: parseInt(value) || 0,
     });
   };
 
-  const handleFeatureChange = (checked) => {
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({
+        ...formData,
+        image: e.target.files[0],
+      });
+    }
+  };
+
+  const handleSwitchChange = (name, checked) => {
     setFormData({
       ...formData,
-      isFeature: checked,
+      [name]: checked,
     });
   };
 
@@ -120,9 +126,11 @@ const Products = () => {
     setFormData({
       name: "",
       category: "",
-      isFeature: true,
-      image: "/api/placeholder/100/100",
+      isFeatured: false,
+      isActive: true,
+      image: null,
       quantity: 0,
+      price: 0,
     });
     setIsOpen(true);
   };
@@ -132,11 +140,12 @@ const Products = () => {
     setCurrentProduct(product);
     setFormData({
       name: product.name,
-      // Use the category ID from the product object
       category: product.category?._id || product.category,
-      isFeature: product.isFeature,
-      image: product.image,
-      quantity: product.quantity,
+      isFeatured: product.isFeature || false, // Map isFeature to isFeatured
+      isActive: product.isActive !== false,
+      image: null, // Reset image to null on edit
+      quantity: product.quantity || 0,
+      price: product.price || 0,
     });
     setIsOpen(true);
   };
@@ -149,43 +158,43 @@ const Products = () => {
   const handleDelete = async () => {
     if (currentProduct) {
       try {
-        await deleteProduct({
-          id: currentProduct._id,
-          price: currentProduct.price,
-          quantity: currentProduct.quantity,
-          isFeatured: currentProduct.isFeature,
-          isActive: currentProduct.isActive,
-          category: currentProduct.category?._id || currentProduct.category,
-          img: currentProduct.image, // Will send it as file format separately if needed
-        }).unwrap();
+        await deleteProduct(currentProduct._id).unwrap();
         setIsDeleteDialogOpen(false);
         setCurrentProduct(null);
-        refetch(); // Refresh product list
+        refetch();
       } catch (error) {
-        console.error("API Error:", error);
+        console.error("Delete Error:", error);
       }
     }
   };
 
   const handleSubmit = async () => {
     try {
+      const formDataToSend = new FormData();
+
       if (mode === "add") {
-        // Add new product
-        await addProduct(formData).unwrap();
-      } else {
-        // Edit existing product
-        const formDataToSend = new FormData();
+        // Fields for add operation
+        formDataToSend.append("name", formData.name);
         formDataToSend.append("price", formData.price);
         formDataToSend.append("quantity", formData.quantity);
-        formDataToSend.append("isFeatured", formData.isFeature);
-        formDataToSend.append("isActive", true); // Assuming active by default
+        formDataToSend.append("isFeatured", formData.isFeatured);
+        formDataToSend.append("isActive", formData.isActive);
         formDataToSend.append("category", formData.category);
 
-        // For image
-        if (formData.image instanceof File) {
-          formDataToSend.append("img", formData.image);
-        } else {
-          // If already an URL string, you might want to fetch it and convert to file if needed
+        if (formData.image) {
+          formDataToSend.append("image", formData.image);
+        }
+
+        await addProduct(formDataToSend).unwrap();
+      } else {
+        // Fields for update operation - excluding category
+        formDataToSend.append("price", formData.price);
+        formDataToSend.append("quantity", formData.quantity);
+        formDataToSend.append("isFeatured", formData.isFeatured);
+        formDataToSend.append("isActive", formData.isActive);
+
+        if (formData.image) {
+          formDataToSend.append("image", formData.image);
         }
 
         await updateProduct({
@@ -193,36 +202,35 @@ const Products = () => {
           data: formDataToSend,
         }).unwrap();
       }
+
       setIsOpen(false);
-      refetch(); // Refresh product list
+      refetch();
     } catch (error) {
-      console.error("API Error:", error);
+      console.error("Submit Error:", error);
     }
   };
 
-  // Handle search
+  // Handle search and filter
   const handleSearch = (e) => {
     setQueryParams({
       ...queryParams,
       search: e.target.value,
-      page: 1, // Reset to first page on new search
+      page: 1,
     });
   };
 
-  // Handle category filter
   const handleCategoryFilter = (category) => {
     setQueryParams({
       ...queryParams,
-      category,
-      page: 1, // Reset to first page on new filter
+      category: category === "all" ? "" : category,
+      page: 1,
     });
   };
 
   // Helper to get category name by ID
   const getCategoryName = (categoryId) => {
-    if (!categoriesData?.categories) return "Unknown";
-
-    const category = categoriesData?.data?.categories.find(
+    if (!categoriesData?.data?.categories) return "Unknown";
+    const category = categoriesData.data.categories.find(
       (cat) => cat._id === categoryId
     );
     return category ? category.name : "Unknown";
@@ -231,19 +239,13 @@ const Products = () => {
   // Pagination handlers
   const handlePreviousPage = () => {
     if (queryParams.page > 1) {
-      setQueryParams({
-        ...queryParams,
-        page: queryParams.page - 1,
-      });
+      setQueryParams({ ...queryParams, page: queryParams.page - 1 });
     }
   };
 
   const handleNextPage = () => {
     if (productsData?.hasNextPage) {
-      setQueryParams({
-        ...queryParams,
-        page: queryParams.page + 1,
-      });
+      setQueryParams({ ...queryParams, page: queryParams.page + 1 });
     }
   };
 
@@ -276,7 +278,7 @@ const Products = () => {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all"></SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {!isCategoriesLoading &&
                 categoriesData?.data?.categories?.map((category) => (
                   <SelectItem key={category._id} value={category._id}>
@@ -299,7 +301,7 @@ const Products = () => {
         {isError && (
           <div className="flex justify-center items-center h-64">
             <p className="text-red-500">
-              Error loading products. Please try again later.
+              Error loading products. Please try again.
             </p>
           </div>
         )}
@@ -315,7 +317,9 @@ const Products = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Quantity</TableHead>
-                  <TableHead>isFeatured</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Featured</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -338,20 +342,31 @@ const Products = () => {
                         {product.name}
                       </TableCell>
                       <TableCell>
-                        {/* Display category name, handling both populated objects and IDs */}
                         {product.category?.name ||
                           getCategoryName(product.category)}
                       </TableCell>
                       <TableCell>{product.quantity}</TableCell>
+                      <TableCell>${product.price}</TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
                             product.isFeature
                               ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {product.isFeature ? "Featured" : "Regular"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            product.isActive !== false
+                              ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {product.isFeature ? "Active" : "Inactive"}
+                          {product.isActive !== false ? "Active" : "Inactive"}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -377,8 +392,8 @@ const Products = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      No products found. Try adjusting your search or filters.
+                    <TableCell colSpan={9} className="text-center py-8">
+                      No products found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -419,8 +434,7 @@ const Products = () => {
                 {mode === "add" ? "Add New Product" : "Edit Product"}
               </DialogTitle>
               <DialogDescription>
-                Fill in the details to{" "}
-                {mode === "add" ? "create a new" : "update the"} product.
+                Fill in the product details.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -437,26 +451,42 @@ const Products = () => {
                   required
                 />
               </div>
+              {mode === "add" && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="category" className="text-right">
+                    Category
+                  </Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={handleCategoryChange}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {!isCategoriesLoading &&
+                        categoriesData?.data?.categories?.map((category) => (
+                          <SelectItem key={category._id} value={category._id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category
+                <Label htmlFor="price" className="text-right">
+                  Price
                 </Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={handleCategoryChange}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {!isCategoriesLoading &&
-                      categoriesData?.data?.categories?.map((category) => (
-                        <SelectItem key={category._id} value={category._id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  min="0"
+                  value={formData.price}
+                  onChange={handleNumericChange}
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">
@@ -468,35 +498,54 @@ const Products = () => {
                   type="number"
                   min="0"
                   value={formData.quantity}
-                  onChange={handleQuantityChange}
+                  onChange={handleNumericChange}
                   className="col-span-3"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="image" className="text-right">
-                  Image URL
+                  Image
                 </Label>
                 <Input
                   id="image"
                   name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
                   className="col-span-3"
-                  placeholder="/api/placeholder/100/100"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="feature" className="text-right">
+                <Label htmlFor="isFeatured" className="text-right">
                   Featured
                 </Label>
                 <div className="flex items-center space-x-2 col-span-3">
                   <Switch
-                    id="feature"
-                    checked={formData.isFeature}
-                    onCheckedChange={handleFeatureChange}
+                    id="isFeatured"
+                    checked={formData.isFeatured}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange("isFeatured", checked)
+                    }
                   />
-                  <Label htmlFor="feature">
-                    {formData.isFeature ? "Active" : "Inactive"}
+                  <Label htmlFor="isFeatured">
+                    {formData.isFeatured ? "Featured" : "Regular"}
+                  </Label>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="isActive" className="text-right">
+                  Status
+                </Label>
+                <div className="flex items-center space-x-2 col-span-3">
+                  <Switch
+                    id="isActive"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange("isActive", checked)
+                    }
+                  />
+                  <Label htmlFor="isActive">
+                    {formData.isActive ? "Active" : "Inactive"}
                   </Label>
                 </div>
               </div>
@@ -525,8 +574,7 @@ const Products = () => {
             <DialogHeader>
               <DialogTitle>Confirm Delete</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete "{currentProduct?.name}"? This
-                action cannot be undone.
+                Are you sure you want to delete "{currentProduct?.name}"?
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2 sm:justify-end">
