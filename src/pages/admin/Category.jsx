@@ -11,14 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   PlusCircle,
   Edit,
   Trash2,
-  Star,
   Image as ImageIcon,
   Loader,
+  Upload,
 } from "lucide-react";
 import { SideBar } from "../../components/basics";
 import {
@@ -29,7 +28,6 @@ import {
 } from "@/api/catApi";
 
 const Categories = () => {
-  // RTK Query hooks
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
@@ -39,6 +37,7 @@ const Categories = () => {
     isLoading,
     isError,
     error,
+    refetch,
   } = useGetAllCategoriesQuery({ page, limit, search });
 
   const [addCategory, { isLoading: isAdding }] = useAddCategoryMutation();
@@ -47,18 +46,17 @@ const Categories = () => {
   const [deleteCategory, { isLoading: isDeleting }] =
     useDeleteCategoryMutation();
 
-  // Local UI state
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
-  const [mode, setMode] = useState("add"); // "add" or "edit"
+  const [mode, setMode] = useState("add");
 
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
-    isFeatured: false,
-    image: "",
+    image: null,
   });
+
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -68,20 +66,30 @@ const Categories = () => {
     });
   };
 
-  const handleFeaturedChange = (checked) => {
-    setFormData({
-      ...formData,
-      isFeatured: checked,
-    });
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({
+        ...formData,
+        image: file,
+      });
+
+      // Create URL for preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const openAddModal = () => {
     setMode("add");
     setFormData({
       name: "",
-      isFeatured: false,
-      image: "/api/placeholder/400/200",
+      image: null,
     });
+    setImagePreview(null);
     setIsOpen(true);
   };
 
@@ -90,9 +98,9 @@ const Categories = () => {
     setCurrentCategory(category);
     setFormData({
       name: category.name,
-      isFeatured: category.isFeatured,
-      image: category.image,
+      image: null, // We can't populate the file input with existing image
     });
+    setImagePreview(category.image); // But we can show the current image as preview
     setIsOpen(true);
   };
 
@@ -104,11 +112,9 @@ const Categories = () => {
   const handleDelete = async () => {
     if (currentCategory) {
       try {
-        // Use the correct ID field (_id if MongoDB is your database)
         const idToUse = currentCategory._id || currentCategory.id;
-        console.log("Deleting category with ID:", idToUse);
-
         await deleteCategory(idToUse).unwrap();
+        refetch();
         setIsDeleteDialogOpen(false);
         setCurrentCategory(null);
       } catch (err) {
@@ -119,19 +125,24 @@ const Categories = () => {
 
   const handleSubmit = async () => {
     try {
-      if (mode === "add") {
-        // Add new category
-        await addCategory(formData).unwrap();
-      } else {
-        // Edit existing category
-        const idToUse = currentCategory._id || currentCategory.id;
-        console.log("Updating category with ID:", idToUse);
+      // Create FormData object for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
 
+      if (formData.image) {
+        formDataToSend.append("image", formData.image);
+      }
+
+      if (mode === "add") {
+        await addCategory(formDataToSend).unwrap();
+      } else {
+        const idToUse = currentCategory._id || currentCategory.id;
         await updateCategory({
           id: idToUse,
-          formData,
+          formData: formDataToSend,
         }).unwrap();
       }
+      refetch();
       setIsOpen(false);
     } catch (err) {
       console.error("Failed to save category:", err);
@@ -178,7 +189,6 @@ const Categories = () => {
           </Button>
         </div>
 
-        {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.isArray(categories) ? (
             categories.map((category) => (
@@ -195,28 +205,11 @@ const Categories = () => {
                       <ImageIcon className="h-12 w-12 text-gray-300" />
                     </div>
                   )}
-                  {category.isFeatured && (
-                    <div className="absolute top-2 right-2 bg-amber-500 text-white rounded-full p-1">
-                      <Star className="h-4 w-4 fill-white" />
-                    </div>
-                  )}
                 </div>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-xl font-semibold">{category.name}</h3>
-                      <div className="flex items-center mt-2">
-                        {category.isFeatured ? (
-                          <div className="flex items-center text-amber-500">
-                            <Star className="h-4 w-4 mr-1 fill-amber-500" />
-                            <span className="text-sm">Featured</span>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-gray-500">
-                            Not Featured
-                          </div>
-                        )}
-                      </div>
                     </div>
                     <div className="text-sm text-gray-500">
                       ID: {category.id}
@@ -254,7 +247,6 @@ const Categories = () => {
           )}
         </div>
 
-        {/* Add/Edit Category Modal */}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -282,30 +274,28 @@ const Categories = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="image" className="text-right">
-                  Image URL
+                  Image
                 </Label>
-                <Input
-                  id="image"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="/api/placeholder/400/200"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="isFeatured" className="text-right">
-                  Featured
-                </Label>
-                <div className="flex items-center space-x-2 col-span-3">
-                  <Switch
-                    id="isFeatured"
-                    checked={formData.isFeatured}
-                    onCheckedChange={handleFeaturedChange}
-                  />
-                  <Label htmlFor="isFeatured">
-                    {formData.isFeatured ? "Featured" : "Not Featured"}
-                  </Label>
+                <div className="col-span-3">
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="image"
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="flex-1"
+                    />
+                  </div>
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="h-32 object-cover rounded-md"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -320,7 +310,6 @@ const Categories = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Modal */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
