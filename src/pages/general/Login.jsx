@@ -80,7 +80,16 @@ function Login() {
       console.log(result);
       localStorage.setItem("user", JSON.stringify(result?.data.user));
       dispatch(setLogin({ userData: result.user }));
-      navigate("/");
+      // navigate("/");
+      if(result?.data?.user?.role === "admin") {
+        navigate("/admin"); // Redirect to admin dashboard
+      }else if(result?.data?.user?.role === "rider"){
+        navigate("/rider"); // Redirect to user dashboard
+      }else if(result?.data?.user?.role === "manager"){
+        navigate("/manager"); // Redirect to guest dashboard
+      }else{
+        navigate("/"); // Redirect to user dashboard
+      }
     } catch (error) {
       setFormError(error?.data?.message || "Login failed. Please try again.");
     }
