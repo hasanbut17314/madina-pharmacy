@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, Clock, CheckCircle2 } from 'lucide-react';
+import { Package, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { useGetRiderOrdersQuery } from '../../api/OrderApi'; // your API hook
 
 const Rider = () => {
@@ -25,6 +25,8 @@ const Rider = () => {
         return <Package className="w-4 h-4 text-yellow-500" />;
       case 'Delivered':
         return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case 'Cancelled':
+        return <XCircle className="w-4 h-4 text-red-500" />;
       default:
         return null;
     }
