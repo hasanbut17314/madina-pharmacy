@@ -12,15 +12,9 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import ChatbotSection from "../../components/sections/ChatbotSection";
 import FeatureSection from "../../components/sections/FeatureSection";
+import { useGetProductsForUserQuery } from "@/api/productApi";
 
-// Fetch data from API
-const fetchProducts = async () => {
-  const response = await fetch("/api/products");
-  const data = await response.json();
-  return data;
-};
-
-// Mock data for brands
+// Mock data for brands (unchanged)
 const fetchBrands = async () => {
   return [
     { id: 1, name: "Brand A", logo: "/path/to/logoA.png" },
@@ -30,27 +24,46 @@ const fetchBrands = async () => {
 };
 
 const Home = () => {
-  const [products, setProducts] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [brands, setBrands] = useState([]);
 
+  // Use the same query hook as in Shop page, but with isFeatured set to true
+  const { data, error, isLoading } = useGetProductsForUserQuery({
+    page: 1,
+    limit: 20,
+    search: "",
+    category: "",
+    isFeatured: true,
+  });
+
+  const { data: productsData = {} } = data || {};
+  const products = productsData.products || [];
+
+  // Log API response to console
   useEffect(() => {
-    const fetchAndSetData = async () => {
-      const [productData, brandData] = await Promise.all([
-        fetchProducts(),
-        fetchBrands(),
-      ]);
-      setProducts(productData.filter((product) => product.isFeatured));
+    if (data) {
+      console.log("API Response:", data);
+      console.log("Featured Products:", products);
+    }
+  }, [data, products]);
+
+  useEffect(() => {
+    const loadBrands = async () => {
+      const brandData = await fetchBrands();
+      setBrands(brandData);
+    };
+    loadBrands();
+
+    // Initialize quantities for products
+    if (products.length > 0) {
       setQuantities(
-        productData.reduce((acc, product) => {
-          acc[product.id] = 1;
+        products.reduce((acc, product) => {
+          acc[product._id] = 1;
           return acc;
         }, {})
       );
-      setBrands(brandData);
-    };
-    fetchAndSetData();
-  }, []);
+    }
+  }, [products]);
 
   const decreaseQuantity = (productId) => {
     setQuantities((prevQuantities) => ({
@@ -68,7 +81,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen font-serif">
-      {/* Banner Slider */}
+      {/* Banner Slider (unchanged) */}
       <section className="mb-6">
         <Carousel
           opts={{
@@ -110,63 +123,80 @@ const Home = () => {
             View All <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {products.map((product) => (
-            <Card
-              key={product.id}
-              className="border border-gray-100 py-0 shadow shadow-gray-200 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-300 ease-in-out"
-            >
-              <CardContent className="p-1 md:p-2 text-center">
-                <div className="relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-24 md:h-32 object-cover mb-2 rounded-md"
-                  />
-                </div>
-                <h3 className="text-xs md:text-sm font-medium mb-1">
-                  {product.name}
-                </h3>
-                <p className="text-red-600 font-bold mb-2 text-xs md:text-sm">
-                  ${product.price.toFixed(2)}
-                </p>
-                <div className="flex justify-center items-center">
+
+        {isLoading ? (
+          <div className="text-center text-gray-500 py-8">
+            Loading featured products...
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-8">
+            Failed to load products
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center text-gray-500 py-8">
+            No featured products available
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            {products.map((product) => (
+              <Card
+                key={product._id}
+                className="border border-gray-100 py-0 shadow shadow-gray-200 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-300 ease-in-out"
+              >
+                <CardContent className="p-1 md:p-2 text-center">
+                  <div className="relative">
+                    <img
+                      src={product.img}
+                      alt={product.name}
+                      className="w-full h-24 md:h-32 object-cover mb-2 rounded-md"
+                    />
+                  </div>
+                  <h3 className="text-xs md:text-sm font-medium mb-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-red-600 font-bold mb-2 text-xs md:text-sm">
+                    ${product.price.toFixed(2)}
+                  </p>
+                  <div className="flex justify-center items-center">
+                    <Button
+                      size="xs"
+                      className="bg-red-600 mr-2"
+                      onClick={() => decreaseQuantity(product._id)}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm">
+                      {quantities[product._id] || 1}
+                    </span>
+                    <Button
+                      size="xs"
+                      className="bg-red-600 ml-2"
+                      onClick={() => increaseQuantity(product._id)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <Button
-                    size="xs"
-                    className="bg-red-600 mr-2"
-                    onClick={() => decreaseQuantity(product.id)}
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 h-6 md:h-8 text-xs mt-2"
                   >
-                    <Minus className="h-4 w-4" />
+                    <ShoppingCart className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />{" "}
+                    Add To Cart
                   </Button>
-                  <span className="text-sm">{quantities[product.id]}</span>
-                  <Button
-                    size="xs"
-                    className="bg-red-600 ml-2"
-                    onClick={() => increaseQuantity(product.id)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 h-6 md:h-8 text-xs mt-2"
-                >
-                  <ShoppingCart className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />{" "}
-                  Add To Cart
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Chatbot Section */}
+      {/* Chatbot Section (unchanged) */}
       <ChatbotSection />
 
-      {/* Features Section */}
+      {/* Features Section (unchanged) */}
       <FeatureSection />
 
-      {/* Brands Section */}
+      {/* Brands Section (unchanged) */}
       <section className="px-4 mb-6">
         <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 underline">
           Our Trusted Brands

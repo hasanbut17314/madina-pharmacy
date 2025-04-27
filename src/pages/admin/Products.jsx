@@ -149,7 +149,15 @@ const Products = () => {
   const handleDelete = async () => {
     if (currentProduct) {
       try {
-        await deleteProduct(currentProduct._id).unwrap();
+        await deleteProduct({
+          id: currentProduct._id,
+          price: currentProduct.price,
+          quantity: currentProduct.quantity,
+          isFeatured: currentProduct.isFeature,
+          isActive: currentProduct.isActive,
+          category: currentProduct.category?._id || currentProduct.category,
+          img: currentProduct.image, // Will send it as file format separately if needed
+        }).unwrap();
         setIsDeleteDialogOpen(false);
         setCurrentProduct(null);
         refetch(); // Refresh product list
@@ -166,9 +174,23 @@ const Products = () => {
         await addProduct(formData).unwrap();
       } else {
         // Edit existing product
-        const result = await updateProduct({
+        const formDataToSend = new FormData();
+        formDataToSend.append("price", formData.price);
+        formDataToSend.append("quantity", formData.quantity);
+        formDataToSend.append("isFeatured", formData.isFeature);
+        formDataToSend.append("isActive", true); // Assuming active by default
+        formDataToSend.append("category", formData.category);
+
+        // For image
+        if (formData.image instanceof File) {
+          formDataToSend.append("img", formData.image);
+        } else {
+          // If already an URL string, you might want to fetch it and convert to file if needed
+        }
+
+        await updateProduct({
           id: currentProduct._id,
-          formData,
+          data: formDataToSend,
         }).unwrap();
       }
       setIsOpen(false);
