@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectCartItems,
@@ -43,32 +43,21 @@ const Cart = () => {
     error,
   } = useGetUserCartQuery();
 
-  const [incrementItem] = useIncrementCartItemMutation();
-  const [decrementItem] = useDecrementCartItemMutation();
-  const [removeItem] = useRemoveItemFromCartMutation();
+  const [isUpdatingQuantity, setIsUpdatingQuantity] = useState({});
+  const [isRemovingItem, setIsRemovingItem] = useState({});
 
-  // For debugging - log all relevant state
-  useEffect(() => {
-    console.log("Cart data from API:", cartData);
-    console.log("Cart items in Redux store:", cartItems);
-    console.log("Cart loading state:", isCartLoading);
-    console.log("Cart API success:", isSuccess);
-    console.log("Cart API error:", error);
-  }, [cartData, cartItems, isCartLoading, isSuccess, error]);
+  const [incrementItem, { isLoading: isLoadingIncrement }] =
+    useIncrementCartItemMutation();
+  const [decrementItem, { isLoading: isLoadingDecrement }] =
+    useDecrementCartItemMutation();
+  const [removeItem, { isLoading: isLoadingRemove }] =
+    useRemoveItemFromCartMutation();
 
   // Manually set cart items when data arrives from API
   useEffect(() => {
     if (isSuccess && cartData) {
       // Check for different possible data structures and adapt
-      const itemsToSet = Array.isArray(cartData)
-        ? cartData
-        : cartData.items
-        ? cartData.items
-        : cartData.cartItems
-        ? cartData.cartItems
-        : cartData.data
-        ? cartData.data
-        : [];
+      const itemsToSet = cartData.data.items;
 
       console.log("Setting cart items to:", itemsToSet);
       dispatch(setItems(itemsToSet));
@@ -86,16 +75,26 @@ const Cart = () => {
   }, [navigate, refetch]);
 
   const handleRemoveFromCart = async (itemId) => {
+    setIsRemovingItem((prev) => ({ ...prev, [itemId]: true }));
     try {
+      console.log("Removing item with ID:", itemId);
       await removeItem(itemId).unwrap();
       dispatch(removeFromCart(itemId));
+      // Refetch cart after item removal to ensure UI is up to date
+      refetch();
     } catch (error) {
       console.error("Failed to remove item from cart:", error);
+    } finally {
+      setIsRemovingItem((prev) => ({ ...prev, [itemId]: false }));
     }
   };
 
   const handleUpdateQuantity = async (itemId, currentQuantity, isIncrement) => {
+    setIsUpdatingQuantity((prev) => ({ ...prev, [itemId]: true }));
     try {
+      // Log the itemId to debug
+      console.log("Updating quantity for item ID:", itemId);
+
       if (isIncrement) {
         await incrementItem(itemId).unwrap();
         dispatch(updateQuantity({ id: itemId, quantity: currentQuantity + 1 }));
@@ -103,8 +102,13 @@ const Cart = () => {
         await decrementItem(itemId).unwrap();
         dispatch(updateQuantity({ id: itemId, quantity: currentQuantity - 1 }));
       }
+
+      // Refetch cart after quantity update to ensure UI is up to date
+      refetch();
     } catch (error) {
       console.error("Failed to update item quantity:", error);
+    } finally {
+      setIsUpdatingQuantity((prev) => ({ ...prev, [itemId]: false }));
     }
   };
 
@@ -158,7 +162,7 @@ const Cart = () => {
                 </TableRow>
               ) : (
                 cartItems.map((item) => (
-                  <TableRow key={item.prodId}>
+                  <TableRow key={item.prodId || item._id}>
                     <TableCell>{item.title}</TableCell>
                     <TableCell className="text-red-600 font-semibold">
                       ${(item.price || 0).toFixed(2)}
@@ -170,28 +174,35 @@ const Cart = () => {
                           size="sm"
                           onClick={() =>
                             handleUpdateQuantity(
-                              item.prodId,
+                              item._id, // Use consistent _id property
                               item.quantity,
                               false
                             )
                           }
                           className="mr-2"
-                          disabled={item.quantity <= 1}
+                          disabled={
+                            item.quantity <= 1 || isUpdatingQuantity[item._id]
+                          }
                         >
                           -
                         </Button>
-                        {item.quantity}
+                        {isUpdatingQuantity[item._id] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          item.quantity
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
+                          onClick={() => {
                             handleUpdateQuantity(
-                              item.prodId,
+                              item._id, // Use consistent _id property
                               item.quantity,
                               true
-                            )
-                          }
+                            );
+                          }}
                           className="ml-2"
+                          disabled={isUpdatingQuantity[item._id]}
                         >
                           +
                         </Button>
@@ -204,9 +215,14 @@ const Cart = () => {
                       <Button
                         variant="destructive"
                         size="icon"
-                        onClick={() => handleRemoveFromCart(item.prodId)}
+                        onClick={() => handleRemoveFromCart(item._id)}
+                        disabled={isRemovingItem[item._id]}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {isRemovingItem[item._id] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

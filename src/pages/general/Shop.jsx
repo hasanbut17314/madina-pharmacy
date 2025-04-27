@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import { addToCart } from "@/store/slices/cartSlice";
 const Shop = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  // Track loading state for each product individually
+  const [loadingItems, setLoadingItems] = useState({});
 
   const selectedCategory = useSelector(
     (state) => state.shop?.selectedCategory || "All"
@@ -32,8 +34,7 @@ const Shop = () => {
     isFeatured: false,
   });
 
-  const [addItemToCart, { isLoading: isAddingToCart }] =
-    useAddItemToCartMutation();
+  const [addItemToCart] = useAddItemToCartMutation();
 
   const { data: productsData = {} } = data || {};
   const products = productsData.products || [];
@@ -48,6 +49,9 @@ const Shop = () => {
     }
 
     try {
+      // Set loading state for this specific product
+      setLoadingItems((prev) => ({ ...prev, [product._id]: true }));
+
       // Call the API to add the item to cart
       await addItemToCart(product._id).unwrap();
 
@@ -55,6 +59,9 @@ const Shop = () => {
       dispatch(addToCart({ product, quantity: 1 }));
     } catch (error) {
       console.error("Failed to add item to cart:", error);
+    } finally {
+      // Clear loading state for this specific product
+      setLoadingItems((prev) => ({ ...prev, [product._id]: false }));
     }
   };
 
@@ -131,9 +138,9 @@ const Shop = () => {
                     size="sm"
                     className="h-7 px-3 border-[#b33] text-[#b33] text-xs hover:bg-[#f7eaea]"
                     onClick={() => handleAddToCart(product)}
-                    disabled={isAddingToCart}
+                    disabled={loadingItems[product._id]}
                   >
-                    {isAddingToCart ? "Adding..." : "Add To Cart"}
+                    {loadingItems[product._id] ? "Adding..." : "Add To Cart"}
                   </Button>
                 </div>
               </CardContent>
