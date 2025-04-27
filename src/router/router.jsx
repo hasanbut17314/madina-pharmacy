@@ -8,6 +8,7 @@ import {
   About,
   Contact,
   Checkout,
+  Orders,
 } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
 import {
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "checkout", element: <Checkout /> },
+      { path: "orders", element: <Orders /> },
       {
         path: "manager",
         children: [
