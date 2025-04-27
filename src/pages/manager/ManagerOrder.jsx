@@ -31,6 +31,7 @@ const ManagerOrder = () => {
   const invoiceRef = useRef();
 
   const order = data?.data;
+  console.log(order);
 
   const handleDownloadInvoice = () => {
     setShowInvoice(true);
@@ -159,12 +160,6 @@ const ManagerOrder = () => {
             <h2 className="text-sm font-semibold mb-2 text-gray-700">Customer Details</h2>
             <div className="space-y-2 bg-gray-50 p-3 rounded-lg border">
               <div>
-                <p className="text-[10px] text-gray-500">Name</p>
-                <p className="text-xs font-medium">
-                  {order.userId?.firstName} {order.userId?.lastName}
-                </p>
-              </div>
-              <div>
                 <p className="text-[10px] text-gray-500">Phone</p>
                 <p className="text-xs">{order.contactNumber}</p>
               </div>
@@ -174,52 +169,55 @@ const ManagerOrder = () => {
               </div>
             </div>
 
-            <div className="mt-4">
-              <h2 className="text-sm font-semibold mb-2 text-gray-700">Rider Assignment</h2>
+            {/* Rider Assignment - Only if order is not Cancelled */}
+            {order.status !== 'Cancelled' && (
+              <div className="mt-4">
+                <h2 className="text-sm font-semibold mb-2 text-gray-700">Rider Assignment</h2>
 
-              {order.assignedRider ? ( // <-- ✅ If assigned, show rider details
-                <div className="space-y-2 bg-gray-50 p-3 rounded-lg border">
-                  <div>
-                    <p className="text-[10px] text-gray-500">Name</p>
-                    <p className="text-xs font-medium">
-                      {order.assignedRider.firstName} {order.assignedRider.lastName}
-                    </p>
+                {order.assignedRider ? (
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg border">
+                    <div>
+                      <p className="text-[10px] text-gray-500">Name</p>
+                      <p className="text-xs font-medium">
+                        {order.assignedRider.firstName} {order.assignedRider.lastName}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500">Email</p>
+                      <p className="text-xs">{order.assignedRider.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500">Email</p>
-                    <p className="text-xs">{order.assignedRider.email}</p>
-                  </div>
-                </div>
-              ) : ( // Else show select box
-                ridersLoading ? (
-                  <div className="text-xs text-gray-500">Loading riders...</div>
                 ) : (
-                  <Select onValueChange={handleRiderAssignment}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Rider" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <ScrollArea className="h-48">
-                        {ridersData?.data?.users?.length > 0 ? (
-                          ridersData.data.users.map((rider) => (
-                            <SelectItem key={rider._id} value={rider._id}>
-                              <div>
-                                <p>{rider.firstName} {rider.lastName}</p>
-                                <p className="text-[10px] text-gray-500">{rider.phone}</p>
-                              </div>
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="text-center text-xs text-gray-400 p-2">
-                            No riders found.
-                          </div>
-                        )}
-                      </ScrollArea>
-                    </SelectContent>
-                  </Select>
-                )
-              )}
-            </div>
+                  ridersLoading ? (
+                    <div className="text-xs text-gray-500">Loading riders...</div>
+                  ) : (
+                    <Select onValueChange={handleRiderAssignment}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Rider" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <ScrollArea className="h-48">
+                          {ridersData?.data?.users?.length > 0 ? (
+                            ridersData.data.users.map((rider) => (
+                              <SelectItem key={rider._id} value={rider._id}>
+                                <div>
+                                  <p>{rider.firstName} {rider.lastName}</p>
+                                  <p className="text-[10px] text-gray-500">{rider.phone}</p>
+                                </div>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="text-center text-xs text-gray-400 p-2">
+                              No riders found.
+                            </div>
+                          )}
+                        </ScrollArea>
+                      </SelectContent>
+                    </Select>
+                  )
+                )}
+              </div>
+            )}
           </div>
 
           {/* Order Items */}

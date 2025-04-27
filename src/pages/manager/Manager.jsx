@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, Clock, CheckCircle2 } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, X } from 'lucide-react'; // Added Truck and X icons
 import { useGetAllOrdersQuery } from '../../api/OrderApi'; // Adjust if needed
 
 const Manager = () => {
@@ -15,14 +15,31 @@ const Manager = () => {
 
   const renderStatusIcon = (status) => {
     switch (status) {
-      case 'Processing':
-        return <Clock className="w-4 h-4 text-blue-500" />;
-      case 'Open':
-        return <Package className="w-4 h-4 text-yellow-500" />;
+      case 'Pending':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'Shipped':
+        return <Truck className="w-4 h-4 text-blue-500" />;
       case 'Delivered':
         return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case 'Cancelled':
+        return <X className="w-4 h-4 text-red-500" />;
       default:
         return null;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending':
+        return "text-yellow-500";
+      case 'Shipped':
+        return "text-blue-500";
+      case 'Delivered':
+        return "text-green-500";
+      case 'Cancelled':
+        return "text-red-500";
+      default:
+        return "text-gray-500";
     }
   };
 
@@ -78,7 +95,9 @@ const Manager = () => {
                       <td className="p-2">${order.totalPrice?.toFixed(2)}</td>
                       <td className="p-2 flex items-center space-x-1">
                         {renderStatusIcon(order.status)}
-                        <span>{order.status}</span>
+                        <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
+                          {order.status}
+                        </span>
                       </td>
                       <td className="p-2">
                         <Button 

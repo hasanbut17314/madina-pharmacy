@@ -1,184 +1,63 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Clock, CheckCircle2, Truck, X } from "lucide-react";
+import { Package, Clock, CheckCircle2, X, Truck } from "lucide-react"; // Truck icon added
 import { SideBar } from "../../components/basics";
-
-// Sample order data
-const orderData = {
-  activeOrders: [
-    {
-      id: "ORD-001",
-      date: "March 20",
-      status: "Processing",
-      totalItems: 2,
-      total: 32.99,
-      customerName: "John Doe",
-      address: "123 Main St, Cityville",
-      products: [
-        { name: "Organic T-shirt", price: 19.99, quantity: 1 },
-        { name: "Cotton Socks", price: 12.99, quantity: 1 },
-      ],
-      rider: "Mike Johnson",
-      estimatedDelivery: "March 23",
-    },
-    {
-      id: "ORD-002",
-      date: "March 19",
-      status: "Open",
-      totalItems: 1,
-      total: 45.5,
-      customerName: "Jane Smith",
-      address: "456 Elm St, Townsburg",
-      products: [{ name: "Leather Jacket", price: 45.5, quantity: 1 }],
-      rider: "Pending Assignment",
-      estimatedDelivery: "March 24",
-    },
-    {
-      id: "ORD-007",
-      date: "March 19",
-      status: "Open",
-      totalItems: 1,
-      total: 45.5,
-      customerName: "Jane Smith",
-      address: "456 Elm St, Townsburg",
-      products: [{ name: "Winter Boots", price: 45.5, quantity: 1 }],
-      rider: "Pending Assignment",
-      estimatedDelivery: "March 24",
-    },
-    {
-      id: "ORD-008",
-      date: "March 19",
-      status: "Processing",
-      totalItems: 1,
-      total: 45.5,
-      customerName: "Jane Smith",
-      address: "456 Elm St, Townsburg",
-      products: [{ name: "Denim Jeans", price: 45.5, quantity: 1 }],
-      rider: "Sarah Wilson",
-      estimatedDelivery: "March 22",
-    },
-  ],
-  deliveredOrders: [
-    {
-      id: "ORD-003",
-      date: "March 15",
-      status: "Delivered",
-      totalItems: 3,
-      total: 22.75,
-      customerName: "Alice Johnson",
-      address: "789 Oak Rd, Villagetown",
-      products: [
-        { name: "Coffee Mug", price: 7.99, quantity: 1 },
-        { name: "Tea Infuser", price: 5.99, quantity: 1 },
-        { name: "Coasters (Set of 4)", price: 8.77, quantity: 1 },
-      ],
-      rider: "Tom Davis",
-      deliveredDate: "March 17",
-    },
-    {
-      id: "ORD-004",
-      date: "March 10",
-      status: "Delivered",
-      totalItems: 1,
-      total: 15.99,
-      customerName: "Bob Williams",
-      address: "101 Pine Lane, Hamletville",
-      products: [{ name: "Notebook", price: 15.99, quantity: 1 }],
-      rider: "Lisa Green",
-      deliveredDate: "March 12",
-    },
-    {
-      id: "ORD-005",
-      date: "March 10",
-      status: "Delivered",
-      totalItems: 1,
-      total: 15.99,
-      customerName: "Bob Williams",
-      address: "101 Pine Lane, Hamletville",
-      products: [{ name: "Water Bottle", price: 15.99, quantity: 1 }],
-      rider: "James Brown",
-      deliveredDate: "March 12",
-    },
-    {
-      id: "ORD-006",
-      date: "March 10",
-      status: "Delivered",
-      totalItems: 1,
-      total: 15.99,
-      customerName: "Bob Williams",
-      address: "101 Pine Lane, Hamletville",
-      products: [{ name: "Phone Case", price: 15.99, quantity: 1 }],
-      rider: "Emma White",
-      deliveredDate: "March 12",
-    },
-  ],
-};
+import { useGetAllOrdersQuery } from "../../api/OrderApi"; // API hook
 
 const AdminOrders = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const { data, isLoading, isError } = useGetAllOrdersQuery({ page, limit });
 
   const renderStatusIcon = (status) => {
     switch (status) {
-      case "Processing":
-        return <Clock className="w-4 h-4 text-blue-500" />;
-      case "Open":
-        return <Package className="w-4 h-4 text-yellow-500" />;
+      case "Pending":
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case "Shipped":
+        return <Truck className="w-4 h-4 text-blue-500" />;
       case "Delivered":
         return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case "Cancelled":
+        return <X className="w-4 h-4 text-red-500" />;
       default:
         return null;
     }
   };
 
-  const handleOrderDetails = (orderId) => {
-    // Find the order in either active or delivered orders
-    const order =
-      orderData.activeOrders.find((order) => order.id === orderId) ||
-      orderData.deliveredOrders.find((order) => order.id === orderId);
-
-    if (order) {
-      setSelectedOrder(order);
-      setShowModal(true);
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "text-yellow-500";
+      case "Shipped":
+        return "text-blue-500";
+      case "Delivered":
+        return "text-green-500";
+      case "Cancelled":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
     }
   };
 
-  const renderOrderList = (orders) => {
-    return orders.map((order) => (
-      <div
-        key={order.id}
-        className="flex md:flex-row items-start md:items-center justify-between p-2 border-b last:border-b-0 hover:bg-gray-50 border-2 border-gray-100 rounded-md my-1"
-      >
-        <div className="flex items-center space-x-2 mb-1 md:mb-0">
-          {renderStatusIcon(order.status)}
-          <div>
-            <p className="font-semibold text-sm">{order.id}</p>
-            <p className="text-xs text-gray-500">{order.date}</p>
-          </div>
-        </div>
-        <div className="flex items-end md:items-center space-x-2">
-          <div className="text-right">
-            <p className="text-xs text-gray-500">Items: {order.totalItems}</p>
-            <p className="font-semibold text-xs text-red-600">
-              ${order.total.toFixed(2)}
-            </p>
-          </div>
-          <Button
-            onClick={() => handleOrderDetails(order.id)}
-            variant="destructive"
-            size="xs"
-            className="bg-red-500 hover:bg-red-400 py-1 px-2 h-7 text-xs"
-          >
-            View Details
-          </Button>
-        </div>
-      </div>
-    ));
+  const handleOrderDetails = (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
   };
 
-  // Modal component
+  const handlePrevPage = () => {
+    if (page > 1) setPage((prev) => prev - 1);
+  };
+
+  const handleNextPage = () => {
+    if (data?.data?.totalPages && page < data.data.totalPages) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
   const OrderDetailsModal = () => {
     if (!selectedOrder) return null;
 
@@ -194,7 +73,7 @@ const AdminOrders = () => {
         <div className="bg-white rounded-lg p-4 max-w-md w-full max-h-[80vh] overflow-y-auto z-10 shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold">
-              Order Details: {selectedOrder.id}
+              Order Details: {selectedOrder.order_no || selectedOrder._id}
             </h3>
             <Button
               onClick={() => setShowModal(false)}
@@ -210,7 +89,7 @@ const AdminOrders = () => {
             {/* Status */}
             <div className="flex items-center">
               {renderStatusIcon(selectedOrder.status)}
-              <span className="ml-2 text-sm font-medium">
+              <span className={`ml-2 text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
                 {selectedOrder.status}
               </span>
             </div>
@@ -218,85 +97,128 @@ const AdminOrders = () => {
             {/* Customer info */}
             <div className="border-t pt-2">
               <h4 className="font-medium text-sm mb-1">Customer Information</h4>
-              <p className="text-sm">{selectedOrder.customerName}</p>
-              <p className="text-xs text-gray-500">{selectedOrder.address}</p>
+              <p className="text-sm">{selectedOrder.userId?.firstName} {selectedOrder.userId?.lastName}</p>
+              <p className="text-xs text-gray-500">{selectedOrder?.address || "N/A"}</p>
             </div>
 
             {/* Products */}
             <div className="border-t pt-2">
               <h4 className="font-medium text-sm mb-1">Products</h4>
               <div className="space-y-2">
-                {selectedOrder.products.map((product, index) => (
+                {selectedOrder.orderItems?.map((item, index) => (
                   <div key={index} className="flex justify-between text-sm">
                     <span>
-                      {product.name} x{product.quantity}
+                      {item.prodId.name} x {item.quantity}
                     </span>
                     <span className="font-medium">
-                      ${product.price.toFixed(2)}
+                      ${item.price.toFixed(2)}
                     </span>
                   </div>
                 ))}
                 <div className="flex justify-between pt-1 border-t text-sm font-semibold">
                   <span>Total:</span>
-                  <span>${selectedOrder.total.toFixed(2)}</span>
+                  <span>${selectedOrder.totalPrice?.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
-            {/* Delivery info */}
-            <div className="border-t pt-2">
-              <h4 className="font-medium text-sm mb-1">Delivery Information</h4>
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                <span className="text-gray-500">Rider:</span>
-                <span>{selectedOrder.rider}</span>
-
-                {selectedOrder.status === "Delivered" ? (
-                  <>
-                    <span className="text-gray-500">Delivered On:</span>
-                    <span>{selectedOrder.deliveredDate}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-gray-500">Est. Delivery:</span>
-                    <span>{selectedOrder.estimatedDelivery}</span>
-                  </>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </div>
     );
   };
 
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-60">Loading orders...</div>;
+  }
+
+  if (isError) {
+    return <div className="flex justify-center items-center h-60 text-red-500">Failed to load orders.</div>;
+  }
+
   return (
     <div className="flex">
       <SideBar />
-
       <div className="container mx-auto p-2 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {/* Active Orders Section */}
-          <Card className="order-1 md:order-1 py-0 gap-0">
-            <CardHeader className="p-3">
-              <CardTitle className="text-lg font-bold">Recent Orders</CardTitle>
-            </CardHeader>
-            <CardContent className="p-2">
-              {renderOrderList(orderData.activeOrders)}
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-bold">All Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Orders Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="text-left bg-gray-100">
+                    <th className="p-2">Order</th>
+                    <th className="p-2">Date</th>
+                    <th className="p-2">Items</th>
+                    <th className="p-2">Total</th>
+                    <th className="p-2">Status</th>
+                    <th className="p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.data?.orders?.length > 0 ? (
+                    data.data.orders.map((order) => (
+                      <tr key={order._id} className="border-b hover:bg-gray-50">
+                        <td className="p-2 font-semibold">{order.order_no || order._id}</td>
+                        <td className="p-2">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="p-2">{order.orderItems?.length || 0}</td>
+                        <td className="p-2">${order.totalPrice?.toFixed(2)}</td>
+                        <td className="p-2 flex items-center space-x-1">
+                          {renderStatusIcon(order.status)}
+                          <span className={getStatusColor(order.status)}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="p-2">
+                          <Button
+                            onClick={() => handleOrderDetails(order)}
+                            variant="destructive"
+                            size="xs"
+                            className="bg-red-500 hover:bg-red-400 py-1 px-2 h-7 text-xs"
+                          >
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-center p-4 text-gray-500">
+                        No orders found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Delivered Orders Section */}
-          <Card className="order-2 md:order-2 py-0 gap-0">
-            <CardHeader className="p-3">
-              <CardTitle className="text-lg font-bold">
-                Delivered Orders
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-2">
-              {renderOrderList(orderData.deliveredOrders)}
-            </CardContent>
-          </Card>
-        </div>
+            {/* Pagination Buttons */}
+            <div className="flex justify-between items-center mt-4">
+              <Button
+                onClick={handlePrevPage}
+                disabled={page === 1}
+                size="sm"
+                className="bg-gray-700 hover:bg-gray-600 text-white"
+              >
+                Previous
+              </Button>
+              <span className="text-sm">
+                Page {page} of {data?.data?.totalPages || 1}
+              </span>
+              <Button
+                onClick={handleNextPage}
+                disabled={page === (data?.data?.totalPages || 1)}
+                size="sm"
+                className="bg-gray-700 hover:bg-gray-600 text-white"
+              >
+                Next
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Modal */}
         {showModal && <OrderDetailsModal />}
