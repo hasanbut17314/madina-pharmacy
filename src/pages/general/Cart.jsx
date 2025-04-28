@@ -59,7 +59,6 @@ const Cart = () => {
       // Check for different possible data structures and adapt
       const itemsToSet = cartData.data.items;
 
-      console.log("Setting cart items to:", itemsToSet);
       dispatch(setItems(itemsToSet));
     }
   }, [cartData, isSuccess, dispatch]);
@@ -77,7 +76,6 @@ const Cart = () => {
   const handleRemoveFromCart = async (itemId) => {
     setIsRemovingItem((prev) => ({ ...prev, [itemId]: true }));
     try {
-      console.log("Removing item with ID:", itemId);
       await removeItem(itemId).unwrap();
       dispatch(removeFromCart(itemId));
       // Refetch cart after item removal to ensure UI is up to date
@@ -93,7 +91,6 @@ const Cart = () => {
     setIsUpdatingQuantity((prev) => ({ ...prev, [itemId]: true }));
     try {
       // Log the itemId to debug
-      console.log("Updating quantity for item ID:", itemId);
 
       if (isIncrement) {
         await incrementItem(itemId).unwrap();
