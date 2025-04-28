@@ -185,21 +185,32 @@ const Products = () => {
           formDataToSend.append("image", formData.image);
         }
 
+        console.log(
+          "Adding product with data:",
+          Object.fromEntries(formDataToSend.entries())
+        );
         await addProduct(formDataToSend).unwrap();
       } else {
-        // Fields for update operation - excluding category
+        // Fields for update operation - including category
+        formDataToSend.append("name", formData.name);
         formDataToSend.append("price", formData.price);
         formDataToSend.append("quantity", formData.quantity);
         formDataToSend.append("isFeatured", formData.isFeatured);
         formDataToSend.append("isActive", formData.isActive);
+        formDataToSend.append("category", formData.category); // Include category in update
 
         if (formData.image) {
           formDataToSend.append("image", formData.image);
         }
 
+        console.log("Updating product with data:", {
+          id: currentProduct._id,
+          formData: Object.fromEntries(formDataToSend.entries()),
+        });
+
         await updateProduct({
           id: currentProduct._id,
-          data: formDataToSend,
+          formData: formDataToSend,
         }).unwrap();
       }
 
