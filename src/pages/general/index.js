@@ -7,4 +7,5 @@ import About from "./About";
 import Contact from "./Contact";
 import Checkout from "./Checkout";
 import Orders from "./Orders";
-export { Home, Cart, Shop, Product, Login, About, Contact, Checkout, Orders };
+import Emailverification from "./Emailverification";
+export { Home, Cart, Shop, Product, Login, About, Contact, Checkout, Orders, Emailverification };
