@@ -53,12 +53,21 @@ export const orderApi = createApi({
         `/order/rider/getOrders?page=${page}&limit=${limit}&status=${status}`,
     }),
 
-    // 🚀 Corrected: Update order status by Rider (send status in body)
+    // Update order status by Rider
     updateOrderStatusByRider: builder.mutation({
       query: ({ id, status }) => ({
         url: `/order/rider/${id}/updateStatus`,
         method: "PUT",
         body: { status },
+      }),
+    }),
+
+    // ✅ Add feedback to an order
+    addFeedback: builder.mutation({
+      query: ({ orderId, feedback }) => ({
+        url: `/order/addFeedback/${orderId}`,
+        method: "PUT",
+        body: { feedback },
       }),
     }),
   }),
@@ -73,4 +82,5 @@ export const {
   useAssignRiderMutation,
   useGetRiderOrdersQuery,
   useUpdateOrderStatusByRiderMutation,
+  useAddFeedbackMutation, // 👈 Export the new hook
 } = orderApi;

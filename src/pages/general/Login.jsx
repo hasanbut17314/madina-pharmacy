@@ -27,6 +27,7 @@ function Login() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    emailSent: null,
   });
 
   const [loginData, setLoginData] = useState({
@@ -77,18 +78,17 @@ function Login() {
 
     try {
       const result = await loginUser(loginData).unwrap();
-      console.log(result);
       localStorage.setItem("user", JSON.stringify(result?.data.user));
       dispatch(setLogin({ userData: result.user }));
-      // navigate("/");
-      if(result?.data?.user?.role === "admin") {
-        navigate("/admin"); // Redirect to admin dashboard
-      }else if(result?.data?.user?.role === "rider"){
-        navigate("/rider"); // Redirect to user dashboard
-      }else if(result?.data?.user?.role === "manager"){
-        navigate("/manager"); // Redirect to guest dashboard
-      }else{
-        navigate("/"); // Redirect to user dashboard
+
+      if (result?.data?.user?.role === "admin") {
+        navigate("/admin");
+      } else if (result?.data?.user?.role === "rider") {
+        navigate("/rider");
+      } else if (result?.data?.user?.role === "manager") {
+        navigate("/manager");
+      } else {
+        navigate("/");
       }
     } catch (error) {
       setFormError(error?.data?.message || "Login failed. Please try again.");
@@ -107,8 +107,18 @@ function Login() {
 
     try {
       const result = await registerUser(signupData).unwrap();
-      dispatch(setLogin({ userData: result.user }));
-      navigate("/dashboard"); // Redirect to dashboard after registration
+      console.log(result.message);
+
+      setSignupData({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        firstName: "",
+        lastName: "",
+        emailSent: result?.data?.email || signupData.email,
+      });
+
+      // dispatch(setLogin({ userData: result.user }));
     } catch (error) {
       setFormError(
         error?.data?.message || "Registration failed. Please try again."
@@ -175,72 +185,82 @@ function Login() {
 
             {/* Signup Tab */}
             <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              {signupData.emailSent ? (
+                <div className="text-sm text-center text-green-600">
+                  <h6>
+                    We sent a verification email to{" "}
+                    <span className="font-medium">{signupData.emailSent}</span>.
+                    Please check your inbox to verify your account.
+                  </h6>
+                </div>
+              ) : (
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-firstName">First Name</Label>
+                      <Input
+                        id="signup-firstName"
+                        type="text"
+                        placeholder="First name"
+                        value={signupData.firstName}
+                        onChange={handleSignupChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-lastName">Last Name</Label>
+                      <Input
+                        id="signup-lastName"
+                        type="text"
+                        placeholder="Last name"
+                        value={signupData.lastName}
+                        onChange={handleSignupChange}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-firstName">First Name</Label>
+                    <Label htmlFor="signup-email">Email</Label>
                     <Input
-                      id="signup-firstName"
-                      type="text"
-                      placeholder="First name"
-                      value={signupData.firstName}
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={signupData.email}
                       onChange={handleSignupChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-lastName">Last Name</Label>
+                    <Label htmlFor="signup-password">Password</Label>
                     <Input
-                      id="signup-lastName"
-                      type="text"
-                      placeholder="Last name"
-                      value={signupData.lastName}
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a password"
+                      value={signupData.password}
                       onChange={handleSignupChange}
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={signupData.email}
-                    onChange={handleSignupChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Create a password"
-                    value={signupData.password}
-                    onChange={handleSignupChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={signupData.confirmPassword}
-                    onChange={handleSignupChange}
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isRegisterLoading}
-                >
-                  {isRegisterLoading ? "Creating account..." : "Sign Up"}
-                </Button>
-              </form>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={signupData.confirmPassword}
+                      onChange={handleSignupChange}
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isRegisterLoading}
+                  >
+                    {isRegisterLoading ? "Creating account..." : "Sign Up"}
+                  </Button>
+                </form>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

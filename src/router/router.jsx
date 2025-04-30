@@ -9,6 +9,7 @@ import {
   Contact,
   Checkout,
   Orders,
+  Emailverification,
 } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
 import { AdminDashboard, Products, Category, AdminOrders } from "../pages/admin";
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: "cart", element: <Cart /> },
       { path: "shop", element: <Shop /> },
       { path: "product/:proId", element: <Product /> },
+      { path: "verify-email/:token", element: <Emailverification /> },
       { path: "login", element: <Login /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },

@@ -69,7 +69,7 @@ const Header = () => {
       {/* Logo */}
       <div className="flex items-center">
         <img
-          src="logo.webp"
+          src="/logo.webp"
           alt="Logo"
           className="h-8 w-auto md:h-10 lg:h-12 mr-2"
         />

@@ -37,8 +37,7 @@ export const authApi = createApi({
         method: "POST",
       }),
     }),
-    
-    // 🔥 New added endpoint: getAllUsers
+
     getAllUsers: builder.query({
       query: ({ page = 1, limit = 10, search = '', role = '' } = {}) => ({
         url: `/user/getAllUsers?page=${page}&limit=${limit}&search=${search}&role=${role}`,
@@ -46,6 +45,13 @@ export const authApi = createApi({
       }),
     }),
 
+    // ✅ New: verify email
+    verifyEmail: builder.query({
+      query: (token) => ({
+        url: `/user/verify-email/${token}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -55,5 +61,6 @@ export const {
   useLogoutMutation,
   useUpdateUserMutation,
   useRecreateAccessTokenMutation,
-  useGetAllUsersQuery, // <-- export the new hook
+  useGetAllUsersQuery,
+  useVerifyEmailQuery, // ✅ Export the hook
 } = authApi;
