@@ -40,7 +40,6 @@ const router = createBrowserRouter([
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "checkout", element: <Checkout /> },
-      { path: "orders", element: <Orders /> },
       { path: "career", element: <Career /> },
       // 🔒 Manager Protected Routes
       {
@@ -70,7 +69,10 @@ const router = createBrowserRouter([
       {
         path: "user",
         element: <ProtectedRoute allowedRoles={["user"]} />,
-        children: [{ index: true, element: <UserProfile /> }],
+        children: [
+          { index: true, element: <UserProfile /> },
+          { path: "orders", element: <Orders /> }
+        ],
       },
 
       // 🔒 Rider Protected Routes
