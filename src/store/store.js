@@ -7,6 +7,7 @@ import cartSlice from "../store/slices/cartSlice";
 import { cartApi } from "../api/CartApi";
 import { categoryApi } from "../api/CatApi";
 import { orderApi } from "../api/OrderApi";
+import { jobApi } from "../api/JobApi";
 const store = configureStore({
     reducer: {
         auth: authSlice,
@@ -17,9 +18,10 @@ const store = configureStore({
         [cartApi.reducerPath]: cartApi.reducer,
         [categoryApi.reducerPath]: categoryApi.reducer,
         [orderApi.reducerPath]: orderApi.reducer,
+        [jobApi.reducerPath]: jobApi.reducer,
     },
     middleware: (getDefaultMiddleware) => {
-        return getDefaultMiddleware().concat(authApi.middleware, productApi.middleware, cartApi.middleware, categoryApi.middleware, orderApi.middleware);
+        return getDefaultMiddleware().concat(authApi.middleware, productApi.middleware, cartApi.middleware, categoryApi.middleware, orderApi.middleware, jobApi.middleware);
     },
 });
 
