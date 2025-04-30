@@ -145,7 +145,7 @@ const Home = () => {
                 <CardContent className="p-1 md:p-2 text-center">
                   <div className="relative">
                     <img
-                      src={product.img}
+                      src={product.image}
                       alt={product.name}
                       className="w-full h-24 md:h-32 object-cover mb-2 rounded-md"
                     />

@@ -37,6 +37,7 @@ const Header = () => {
     { name: "Shop", href: "/shop" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
+    { name: "Career", href: "/career" },
   ];
 
   // 🛡️ AUTO REDIRECT Handling

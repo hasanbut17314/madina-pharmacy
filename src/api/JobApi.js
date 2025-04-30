@@ -40,6 +40,44 @@ export const jobApi = createApi({
       query: ({ page = 1, limit = 10, search = "" }) =>
         `/job/getAllJobs?page=${page}&limit=${limit}&search=${search}`,
     }),
+
+    // Submit an application for a job
+    submitApplication: builder.mutation({
+      query: ({ jobId, fullName, email, phone, coverLetter, resume }) => ({
+        url: "/job/submitApplication",
+        method: "POST",
+        body: { jobId, fullName, email, phone, coverLetter, resume },
+      }),
+    }),
+
+    // Get an application by ID
+    getApplicationById: builder.query({
+      query: (id) => `/job/getApplicationById/${id}`,
+    }),
+
+    // Update the application status
+    updateApplicationStatus: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/job/updateApplicationStatus/${id}`,
+        // status is like  ['pending', 'reviewing', 'interviewed', 'selected', 'rejected']
+        method: "PUT",
+        body: { status },
+      }),
+    }),
+
+    // Get all applications with pagination, status, and search filter
+    getAllApplications: builder.query({
+      query: ({ page = 1, limit = 10, jobId = "", status = "pending", search = "" }) =>
+        `/job/getAllApplications?page=${page}&limit=${limit}&jobId=${jobId}&status=${status}&search=${search}`,
+    }),
+
+    // Delete an application by ID
+    deleteApplication: builder.mutation({
+      query: (id) => ({
+        url: `/job/deleteApplication/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -49,4 +87,9 @@ export const {
   useDeleteJobMutation,
   useGetJobByIdQuery,
   useGetAllJobsQuery,
+  useSubmitApplicationMutation,
+  useGetApplicationByIdQuery,
+  useUpdateApplicationStatusMutation,
+  useGetAllApplicationsQuery,
+  useDeleteApplicationMutation,
 } = jobApi;

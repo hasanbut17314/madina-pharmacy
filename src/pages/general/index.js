@@ -8,4 +8,5 @@ import Contact from "./Contact";
 import Checkout from "./Checkout";
 import Orders from "./Orders";
 import Emailverification from "./Emailverification";
-export { Home, Cart, Shop, Product, Login, About, Contact, Checkout, Orders, Emailverification };
+import  Career  from "./Career";
+export { Home, Cart, Shop, Product, Login, About, Contact, Checkout, Orders, Emailverification, Career };

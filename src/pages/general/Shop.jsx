@@ -149,7 +149,7 @@ const Shop = () => {
             >
               <CardContent className="p-2">
                 <img
-                  src={product.img}
+                  src={product.image}
                   alt={product.name}
                   className="w-full h-36 object-cover rounded mb-1"
                 />

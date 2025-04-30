@@ -8,6 +8,8 @@ import {
   ShoppingCart,
   Menu,
   LogOut,
+  Briefcase,
+  FileText,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -35,6 +37,18 @@ const SideBar = ({ children }) => {
       label: "Orders",
       icon: ShoppingCart,
       link: "/admin/orders",
+    },
+    {
+      id: "Jobs",
+      label: "Jobs",
+      icon: Briefcase,
+      link: "/admin/jobs",
+    },
+    {
+      id: "applications",
+      label: "Applications",
+      icon: FileText,
+      link: "/admin/Application",
     },
   ];
   const SidebarContent = ({ mobile = false }) => (
@@ -105,7 +119,7 @@ const SideBar = ({ children }) => {
 
       <div className="lg:ml-64 min-h-screen">
         <div className="lg:hidden h-14" />
-        <main className="p-6">{children}</main>
+          <main className="p-6">{children}</main>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   Checkout,
   Orders,
   Emailverification,
+  Career
 } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
 import {
@@ -17,6 +18,8 @@ import {
   Products,
   Category,
   AdminOrders,
+  AdminJobs,
+  AdminApp
 } from "../pages/admin";
 import { UserProfile } from "../pages/user";
 import { Rider, RiderOrders } from "../pages/rider";
@@ -38,6 +41,7 @@ const router = createBrowserRouter([
       { path: "contact", element: <Contact /> },
       { path: "checkout", element: <Checkout /> },
       { path: "orders", element: <Orders /> },
+      { path: "career", element: <Career /> },
       // 🔒 Manager Protected Routes
       {
         path: "manager",
@@ -57,6 +61,8 @@ const router = createBrowserRouter([
           { path: "products", element: <Products /> },
           { path: "category", element: <Category /> },
           { path: "orders", element: <AdminOrders /> },
+          { path: "jobs", element: <AdminJobs /> },
+          { path: "application", element: <AdminApp /> },
         ],
       },
 
