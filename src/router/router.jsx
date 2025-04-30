@@ -11,7 +11,12 @@ import {
   Orders,
 } from "../pages/general";
 import { Manager, ManagerOrder } from "../pages/manager";
-import { AdminDashboard, Products, Category, AdminOrders } from "../pages/admin";
+import {
+  AdminDashboard,
+  Products,
+  Category,
+  AdminOrders,
+} from "../pages/admin";
 import { UserProfile } from "../pages/user";
 import { Rider, RiderOrders } from "../pages/rider";
 import { Layout } from ".";
@@ -30,6 +35,7 @@ const router = createBrowserRouter([
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "checkout", element: <Checkout /> },
+      { path: "orders", element: <Orders /> },
       // 🔒 Manager Protected Routes
       {
         path: "manager",
@@ -56,10 +62,7 @@ const router = createBrowserRouter([
       {
         path: "user",
         element: <ProtectedRoute allowedRoles={["user"]} />,
-        children: [
-          { index: true, element: <UserProfile /> },
-          { path: "orders", element: <Orders /> },
-        ],
+        children: [{ index: true, element: <UserProfile /> }],
       },
 
       // 🔒 Rider Protected Routes

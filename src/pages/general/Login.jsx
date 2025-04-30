@@ -77,17 +77,16 @@ function Login() {
 
     try {
       const result = await loginUser(loginData).unwrap();
-      console.log(result);
       localStorage.setItem("user", JSON.stringify(result?.data.user));
       dispatch(setLogin({ userData: result.user }));
       // navigate("/");
-      if(result?.data?.user?.role === "admin") {
+      if (result?.data?.user?.role === "admin") {
         navigate("/admin"); // Redirect to admin dashboard
-      }else if(result?.data?.user?.role === "rider"){
+      } else if (result?.data?.user?.role === "rider") {
         navigate("/rider"); // Redirect to user dashboard
-      }else if(result?.data?.user?.role === "manager"){
+      } else if (result?.data?.user?.role === "manager") {
         navigate("/manager"); // Redirect to guest dashboard
-      }else{
+      } else {
         navigate("/"); // Redirect to user dashboard
       }
     } catch (error) {
