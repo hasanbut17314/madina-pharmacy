@@ -185,10 +185,6 @@ const Products = () => {
           formDataToSend.append("image", formData.image);
         }
 
-        console.log(
-          "Adding product with data:",
-          Object.fromEntries(formDataToSend.entries())
-        );
         await addProduct(formDataToSend).unwrap();
       } else {
         // Fields for update operation - including category

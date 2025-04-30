@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChevronRight, ShoppingCart, Plus, Minus } from "lucide-react";
+import { ChevronRight, ShoppingCart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,10 @@ import Autoplay from "embla-carousel-autoplay";
 import ChatbotSection from "../../components/sections/ChatbotSection";
 import FeatureSection from "../../components/sections/FeatureSection";
 import { useGetProductsForUserQuery } from "@/api/productApi";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "@/store/slices/cartSlice";
+import { useAddItemToCartMutation } from "@/api/CartApi";
 
 // Mock data for brands (unchanged)
 const fetchBrands = async () => {
@@ -24,8 +28,11 @@ const fetchBrands = async () => {
 };
 
 const Home = () => {
-  const [quantities, setQuantities] = useState({});
   const [brands, setBrands] = useState([]);
+  const [loadingItems, setLoadingItems] = useState({}); // Track loading state for each product
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [addItemToCart] = useAddItemToCartMutation();
 
   // Use the same query hook as in Shop page, but with isFeatured set to true
   const { data, error, isLoading } = useGetProductsForUserQuery({
@@ -39,44 +46,36 @@ const Home = () => {
   const { data: productsData = {} } = data || {};
   const products = productsData.products || [];
 
-  // Log API response to console
-  useEffect(() => {
-    if (data) {
-      console.log("API Response:", data);
-      console.log("Featured Products:", products);
-    }
-  }, [data, products]);
-
   useEffect(() => {
     const loadBrands = async () => {
       const brandData = await fetchBrands();
       setBrands(brandData);
     };
     loadBrands();
+  }, []);
 
-    // Initialize quantities for products
-    if (products.length > 0) {
-      setQuantities(
-        products.reduce((acc, product) => {
-          acc[product._id] = 1;
-          return acc;
-        }, {})
-      );
+  const handleAddToCart = async (product) => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+      return;
     }
-  }, [products]);
 
-  const decreaseQuantity = (productId) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [productId]: Math.max(1, prevQuantities[productId] - 1),
-    }));
-  };
+    try {
+      // Set loading state for this specific product
+      setLoadingItems((prev) => ({ ...prev, [product._id]: true }));
 
-  const increaseQuantity = (productId) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [productId]: prevQuantities[productId] + 1,
-    }));
+      // Call the API to add the item to cart
+      await addItemToCart(product._id).unwrap();
+
+      // Update the Redux store
+      dispatch(addToCart({ product, quantity: 1 }));
+    } catch (error) {
+      console.error("Failed to add item to cart:", error);
+    } finally {
+      // Clear loading state for this specific product
+      setLoadingItems((prev) => ({ ...prev, [product._id]: false }));
+    }
   };
 
   return (
@@ -157,31 +156,14 @@ const Home = () => {
                   <p className="text-red-600 font-bold mb-2 text-xs md:text-sm">
                     ${product.price.toFixed(2)}
                   </p>
-                  <div className="flex justify-center items-center">
-                    <Button
-                      size="xs"
-                      className="bg-red-600 mr-2"
-                      onClick={() => decreaseQuantity(product._id)}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm">
-                      {quantities[product._id] || 1}
-                    </span>
-                    <Button
-                      size="xs"
-                      className="bg-red-600 ml-2"
-                      onClick={() => increaseQuantity(product._id)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
                   <Button
                     size="sm"
-                    className="bg-red-600 hover:bg-red-700 h-6 md:h-8 text-xs mt-2"
+                    className="bg-red-600 hover:bg-red-700 h-6 md:h-8 text-xs"
+                    onClick={() => handleAddToCart(product)}
+                    disabled={loadingItems[product._id]}
                   >
                     <ShoppingCart className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />{" "}
-                    Add To Cart
+                    {loadingItems[product._id] ? "Adding..." : "Add To Cart"}
                   </Button>
                 </CardContent>
               </Card>

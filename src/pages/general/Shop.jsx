@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,16 +15,43 @@ import { setSelectedCategory } from "@/store/slices/shopSlice";
 import { useGetProductsForUserQuery } from "@/api/productApi";
 import { useAddItemToCartMutation } from "@/api/CartApi";
 import { addToCart } from "@/store/slices/cartSlice";
+import { useGetAllCategoriesQuery } from "@/api/catApi";
 
 const Shop = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   // Track loading state for each product individually
   const [loadingItems, setLoadingItems] = useState({});
+  const [categoryMapping, setCategoryMapping] = useState({});
+  const [categories, setCategories] = useState([]);
 
   const selectedCategory = useSelector(
     (state) => state.shop?.selectedCategory || "All"
   );
+
+  // Fetch all categories
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useGetAllCategoriesQuery({
+      page: 1,
+      limit: 100, // Get a large number to ensure we get all categories
+      search: "",
+    });
+
+  // Create a mapping of category IDs to names when categoriesData changes
+  useEffect(() => {
+    if (categoriesData?.data?.categories) {
+      const mapping = { All: "All" };
+      const categoryList = [{ _id: "All", name: "All" }];
+
+      categoriesData.data.categories.forEach((category) => {
+        mapping[category._id] = category.name;
+        categoryList.push(category);
+      });
+
+      setCategoryMapping(mapping);
+      setCategories(categoryList);
+    }
+  }, [categoriesData]);
 
   const { data, error, isLoading } = useGetProductsForUserQuery({
     page: 1,
@@ -38,8 +65,6 @@ const Shop = () => {
 
   const { data: productsData = {} } = data || {};
   const products = productsData.products || [];
-
-  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   const handleAddToCart = async (product) => {
     const storedUser = localStorage.getItem("user");
@@ -82,16 +107,18 @@ const Shop = () => {
                 onValueChange={(value) => dispatch(setSelectedCategory(value))}
               >
                 <SelectTrigger className="mt-1 h-8 text-xs">
-                  <SelectValue placeholder="Select Category" />
+                  <SelectValue placeholder="Select Category">
+                    {categoryMapping[selectedCategory] || "Select Category"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem
-                      key={category}
-                      value={category}
+                      key={category._id}
+                      value={category._id}
                       className="text-xs"
                     >
-                      {category}
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -102,7 +129,7 @@ const Shop = () => {
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-        {isLoading ? (
+        {isLoading || categoriesLoading ? (
           <div className="col-span-full text-center text-gray-500 text-sm font-serif">
             Loading...
           </div>
@@ -117,7 +144,7 @@ const Shop = () => {
         ) : (
           products.map((product) => (
             <Card
-              key={product.id}
+              key={product._id}
               className="bg-white border border-[#e4e4e4] rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
             >
               <CardContent className="p-2">

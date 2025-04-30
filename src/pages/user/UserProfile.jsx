@@ -117,7 +117,6 @@ function UserProfile() {
         }
       } catch (error) {
         console.error("Failed to update user profile:", error);
-        setUpdateError("Failed to update profile. Please try again.");
       }
     }
     setEditMode(!editMode);

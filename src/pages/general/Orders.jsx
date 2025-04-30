@@ -6,8 +6,9 @@ const Orders = () => {
   const [limit, setLimit] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
   const [cancelledOrderId, setCancelledOrderId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null); // ✅ New State
+  const [isModalOpen, setIsModalOpen] = useState(false); // ✅ New State
 
-  // Fetch user orders
   const {
     data: ordersData,
     isLoading,
@@ -16,21 +17,28 @@ const Orders = () => {
     refetch,
   } = useGetUserOrdersQuery({ page, limit, status: statusFilter });
 
-  // Cancel order mutation
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
 
-  // Handle order cancellation
   const handleCancelOrder = async (orderId) => {
     try {
       await cancelOrder(orderId).unwrap();
       setCancelledOrderId(orderId);
-      refetch(); // Refetch after cancelling
+      refetch();
     } catch (error) {
       console.error("Failed to cancel order:", error);
     }
   };
 
-  // Status filter options
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(false);
+  };
+
   const statusOptions = [
     "",
     "pending",
@@ -40,7 +48,6 @@ const Orders = () => {
     "cancelled",
   ];
 
-  // Reset page when changing filters
   useEffect(() => {
     setPage(1);
   }, [statusFilter]);
@@ -57,7 +64,6 @@ const Orders = () => {
     );
   }
 
-  // ordersData is an array
   const orders = Array.isArray(ordersData?.data?.orders)
     ? ordersData.data.orders
     : [];
@@ -100,7 +106,8 @@ const Orders = () => {
                 <th className="py-2 px-4 border">Status</th>
                 <th className="py-2 px-4 border">Address</th>
                 <th className="py-2 px-4 border">Contact</th>
-                <th className="py-2 px-4 border">Actions</th>
+                <th className="py-2 px-4 border">Actions</th>{" "}
+                {/* 🛠️ Update Actions */}
               </tr>
             </thead>
             <tbody>
@@ -128,7 +135,16 @@ const Orders = () => {
                   </td>
                   <td className="py-2 px-4 border">{order.address}</td>
                   <td className="py-2 px-4 border">{order.contactNumber}</td>
-                  <td className="py-2 px-4 border">
+                  <td className="py-2 px-4 border flex gap-2">
+                    {/* View Button */}
+                    <button
+                      onClick={() => handleViewOrder(order)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
+                    >
+                      View
+                    </button>
+
+                    {/* Cancel Button */}
                     {order.status.toLowerCase() !== "cancelled" &&
                     order.status.toLowerCase() !== "delivered" ? (
                       <button
@@ -140,7 +156,7 @@ const Orders = () => {
                       >
                         {isCancelling && cancelledOrderId === order._id
                           ? "Cancelling..."
-                          : "Cancel Order"}
+                          : "Cancel"}
                       </button>
                     ) : order.status.toLowerCase() === "cancelled" ? (
                       <span className="text-red-500">Cancelled</span>
@@ -181,6 +197,39 @@ const Orders = () => {
       <div className="mt-4 text-sm text-gray-600">
         Showing {orders.length} orders
       </div>
+
+      {/* 🛠️ Modal */}
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96 relative">
+            <h2 className="text-xl font-bold mb-4">Order Details</h2>
+            <p>
+              <strong>Order ID:</strong> {selectedOrder._id}
+            </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(selectedOrder.createdAt).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedOrder.status}
+            </p>
+            <p>
+              <strong>Address:</strong> {selectedOrder.address}
+            </p>
+            <p>
+              <strong>Contact:</strong> {selectedOrder.contactNumber}
+            </p>
+            {/* You can add more fields if needed */}
+
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 text-gray-500 hover:text-black"
+            >
+              ✖
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
