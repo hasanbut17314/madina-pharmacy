@@ -19,11 +19,12 @@ const Header = () => {
   const dispatch = useDispatch();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const userData = localStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
 
-  const [logoutUser, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const [logoutUser] = useLogoutMutation();
 
   const restrictedRoutes = ["/admin", "/manager", "/rider"];
   const shouldShowNavElements = !restrictedRoutes.some((route) =>
@@ -55,6 +56,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
       await logoutUser().unwrap();
     } catch (error) {
       console.error("Logout API error:", error);
@@ -62,6 +64,13 @@ const Header = () => {
       dispatch(logout());
       localStorage.removeItem("user");
       navigate("/login");
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${searchQuery}`);
     }
   };
 
@@ -101,9 +110,10 @@ const Header = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search..."
               className="px-3 py-1.5 rounded-md bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#A8DADC] w-64"
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             <button
-              onClick={() => console.log("Search:", searchQuery)}
+              onClick={handleSearch}
               className="absolute right-2 text-[#1D3557] hover:text-[#457B9D]"
             >
               🔍
@@ -196,12 +206,10 @@ const Header = () => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search for products..."
                       className="w-full px-4 py-2 rounded-lg bg-white text-black placeholder-gray-500 shadow-md focus:outline-none focus:ring-2 focus:ring-[#A8DADC]"
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                     <button
-                      onClick={() => {
-                        console.log("Search:", searchQuery);
-                        setIsSheetOpen(false);
-                      }}
+                      onClick={handleSearch}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1D3557] hover:text-[#457B9D]"
                     >
                       🔍

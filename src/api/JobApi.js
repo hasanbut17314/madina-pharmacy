@@ -43,10 +43,10 @@ export const jobApi = createApi({
 
     // Submit an application for a job
     submitApplication: builder.mutation({
-      query: ({ jobId, fullName, email, phone, coverLetter, resume }) => ({
+      query: (formData) => ({
         url: "/job/submitApplication",
         method: "POST",
-        body: { jobId, fullName, email, phone, coverLetter, resume },
+        body: formData,
       }),
     }),
 
