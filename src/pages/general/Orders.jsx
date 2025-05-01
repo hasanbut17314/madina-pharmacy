@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { useGetUserOrdersQuery, useCancelOrderMutation } from "@/api/orderApi"; // Update if needed
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+
+import {
+  useGetUserOrdersQuery,
+  useCancelOrderMutation,
+  useAddFeedbackMutation, // ✅ Import feedback mutation
+} from "@/api/orderApi";
 
 const Orders = () => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
-  const [cancelledOrderId, setCancelledOrderId] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null); // ✅ New State
-  const [isModalOpen, setIsModalOpen] = useState(false); // ✅ New State
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
 
   const {
     data: ordersData,
@@ -18,11 +32,11 @@ const Orders = () => {
   } = useGetUserOrdersQuery({ page, limit, status: statusFilter });
 
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
+  const [addFeedback, { isLoading: isSubmittingFeedback }] = useAddFeedbackMutation(); // ✅ Hook for feedback
 
   const handleCancelOrder = async (orderId) => {
     try {
       await cancelOrder(orderId).unwrap();
-      setCancelledOrderId(orderId);
       refetch();
     } catch (error) {
       console.error("Failed to cancel order:", error);
@@ -34,19 +48,28 @@ const Orders = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setSelectedOrder(null);
-    setIsModalOpen(false);
+  const handleFeedbackClick = (order) => {
+    setSelectedOrder(order);
+    setFeedbackText("");
+    setIsFeedbackModalOpen(true);
   };
 
-  const statusOptions = [
-    "",
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ];
+  const handleSubmitFeedback = async () => {
+    if (!selectedOrder?._id || !feedbackText.trim()) return;
+
+    try {
+      await addFeedback({
+        orderId: selectedOrder._id,
+        feedback: feedbackText.trim(),
+      }).unwrap();
+
+      setIsFeedbackModalOpen(false);
+      setFeedbackText("");
+      refetch();
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    }
+  };
 
   useEffect(() => {
     setPage(1);
@@ -64,11 +87,9 @@ const Orders = () => {
     );
   }
 
-  const orders = Array.isArray(ordersData?.data?.orders)
-    ? ordersData.data.orders
-    : [];
-  const totalOrders = ordersData?.data?.totalOrders || 0;
-  const totalPages = ordersData?.data?.totalPages || 0;
+  const orders = ordersData?.data?.orders || [];
+  const totalOrders = ordersData?.data?.pagination?.total || 0;
+  const totalPages = Math.ceil(totalOrders / limit) || 1;
 
   return (
     <div className="container mx-auto p-4">
@@ -83,7 +104,7 @@ const Orders = () => {
           className="border rounded p-2"
         >
           <option value="">All Status</option>
-          {statusOptions.slice(1).map((status) => (
+          {["pending", "shipped", "delivered", "cancelled"].map((status) => (
             <option key={status} value={status}>
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </option>
@@ -93,79 +114,90 @@ const Orders = () => {
 
       {/* Orders list */}
       {orders.length === 0 ? (
-        <div className="text-center p-8 bg-gray-50 rounded">
-          No orders found
-        </div>
+        <div className="text-center p-8 bg-gray-50 rounded">No orders found</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200">
             <thead className="bg-gray-100">
               <tr>
-                <th className="py-2 px-4 border">Order ID</th>
+                <th className="py-2 px-4 border">Order No</th>
                 <th className="py-2 px-4 border">Date</th>
                 <th className="py-2 px-4 border">Status</th>
                 <th className="py-2 px-4 border">Address</th>
                 <th className="py-2 px-4 border">Contact</th>
-                <th className="py-2 px-4 border">Actions</th>{" "}
-                {/* 🛠️ Update Actions */}
+                <th className="py-2 px-4 border">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
-                <tr key={order._id} className="border-b">
-                  <td className="py-2 px-4 border">{order._id}</td>
-                  <td className="py-2 px-4 border">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="py-2 px-4 border">
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        order.status.toLowerCase() === "delivered"
-                          ? "bg-green-100 text-green-800"
-                          : order.status.toLowerCase() === "cancelled"
-                          ? "bg-red-100 text-red-800"
-                          : order.status.toLowerCase() === "shipped"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="py-2 px-4 border">{order.address}</td>
-                  <td className="py-2 px-4 border">{order.contactNumber}</td>
-                  <td className="py-2 px-4 border flex gap-2">
-                    {/* View Button */}
-                    <button
-                      onClick={() => handleViewOrder(order)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
-                    >
-                      View
-                    </button>
+              {orders.map((order) => {
+                const orderStatus = order.status.toLowerCase();
+                const isActivatable = !["cancelled", "delivered"].includes(orderStatus);
 
-                    {/* Cancel Button */}
-                    {order.status.toLowerCase() !== "cancelled" &&
-                    order.status.toLowerCase() !== "delivered" ? (
-                      <button
-                        onClick={() => handleCancelOrder(order._id)}
-                        disabled={
-                          isCancelling && cancelledOrderId === order._id
-                        }
-                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded disabled:opacity-50"
+                return (
+                  <tr key={order._id} className="border-b">
+                    <td className="py-2 px-4 border">{order.order_no}</td>
+                    <td className="py-2 px-4 border">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          orderStatus === "delivered"
+                            ? "bg-green-100 text-green-800"
+                            : orderStatus === "cancelled"
+                            ? "bg-red-100 text-red-800"
+                            : orderStatus === "shipped"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
                       >
-                        {isCancelling && cancelledOrderId === order._id
-                          ? "Cancelling..."
-                          : "Cancel"}
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="py-2 px-4 border">{order.address}</td>
+                    <td className="py-2 px-4 border">{order.contactNumber}</td>
+                    <td className="py-2 px-4 border flex gap-2">
+                      <button
+                        onClick={() => handleViewOrder(order)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
+                      >
+                        View
                       </button>
-                    ) : order.status.toLowerCase() === "cancelled" ? (
-                      <span className="text-red-500">Cancelled</span>
-                    ) : (
-                      <span className="text-green-500">Completed</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+
+                      {isActivatable ? (
+                        <button
+                          onClick={() => handleCancelOrder(order._id)}
+                          disabled={isCancelling}
+                          className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded disabled:opacity-50"
+                        >
+                          {isCancelling ? "Cancelling..." : "Cancel"}
+                        </button>
+                      ) : (
+                        <>
+                          <span
+                            className={
+                              orderStatus === "cancelled"
+                                ? "text-red-500"
+                                : "text-green-500"
+                            }
+                          >
+                            {orderStatus === "cancelled" ? "Cancelled" : "Completed"}
+                          </span>
+
+                          {orderStatus === "delivered" && order.feedback === null && (
+                            <button
+                              onClick={() => handleFeedbackClick(order)}
+                              className="bg-purple-500 hover:bg-purple-600 text-white py-1 px-3 rounded ml-2"
+                            >
+                              Feedback
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -181,55 +213,118 @@ const Orders = () => {
           >
             Prev
           </button>
-
-          <span className="mx-2 py-1">Page {page}</span>
-
+          <span className="mx-2 py-1">
+            Page {page} of {totalPages}
+          </span>
           <button
-            onClick={() => setPage(page + 1)}
-            className="mx-1 px-3 py-1 border rounded"
+            onClick={() => setPage(Math.min(totalPages, page + 1))}
+            disabled={page >= totalPages}
+            className="mx-1 px-3 py-1 border rounded disabled:opacity-50"
           >
             Next
           </button>
         </div>
       )}
 
-      {/* Order count */}
-      <div className="mt-4 text-sm text-gray-600">
-        Showing {orders.length} orders
-      </div>
+      <div className="mt-4 text-sm text-gray-600">Showing {orders.length} orders</div>
 
-      {/* 🛠️ Modal */}
-      {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 relative">
-            <h2 className="text-xl font-bold mb-4">Order Details</h2>
-            <p>
-              <strong>Order ID:</strong> {selectedOrder._id}
-            </p>
-            <p>
-              <strong>Date:</strong>{" "}
-              {new Date(selectedOrder.createdAt).toLocaleDateString()}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedOrder.status}
-            </p>
-            <p>
-              <strong>Address:</strong> {selectedOrder.address}
-            </p>
-            <p>
-              <strong>Contact:</strong> {selectedOrder.contactNumber}
-            </p>
-            {/* You can add more fields if needed */}
+      {/* Order Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              Order #{selectedOrder?.order_no}
+            </DialogTitle>
+            <DialogDescription>
+              Placed on:{" "}
+              {selectedOrder && new Date(selectedOrder.createdAt).toLocaleDateString()}
+            </DialogDescription>
+          </DialogHeader>
 
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-black"
-            >
-              ✖
-            </button>
+          {selectedOrder && (
+            <div className="mt-4 space-y-4 text-sm text-gray-800">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-semibold">Status:</p>
+                  <p>{selectedOrder.status}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Contact:</p>
+                  <p>{selectedOrder.contactNumber}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="font-semibold">Address:</p>
+                  <p>{selectedOrder.address}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="font-semibold mb-1">Products:</p>
+                {selectedOrder.orderItems?.length > 0 ? (
+                  <ul className="list-disc list-inside space-y-1">
+                    {selectedOrder.orderItems.map((item, i) => (
+                      <li key={i}>
+                        {item.prodId?.name || "Unnamed"} – Qty: {item.quantity} – Price: {item.price}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No product details found.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogClose className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" />
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback Modal */}
+      <Dialog open={isFeedbackModalOpen} onOpenChange={setIsFeedbackModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">Order Feedback</DialogTitle>
+            <DialogDescription>
+              Share your experience with order #{selectedOrder?.order_no}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="feedback" className="block text-sm font-medium text-gray-700">
+                Your Feedback
+              </label>
+              <textarea
+                id="feedback"
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="Please share your thoughts about this order..."
+                className="w-full rounded-md border border-gray-300 p-3 h-32 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setIsFeedbackModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitFeedback}
+                disabled={isSubmittingFeedback}
+                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+
+          <DialogClose className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

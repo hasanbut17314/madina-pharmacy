@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Clock, CheckCircle2, X, Truck } from "lucide-react"; // Truck icon added
+import { Package, Clock, CheckCircle2, X, Truck } from "lucide-react";
 import { SideBar } from "../../components/basics";
-import { useGetAllOrdersQuery } from "../../api/OrderApi"; // API hook
+import { useGetAllOrdersQuery } from "../../api/OrderApi";
 
 const AdminOrders = () => {
   const [showModal, setShowModal] = useState(false);
@@ -122,6 +122,13 @@ const AdminOrders = () => {
               </div>
             </div>
 
+            {/* Feedback */}
+            {selectedOrder.feedback && (
+              <div className="border-t pt-2">
+                <h4 className="font-medium text-sm mb-1">Customer Feedback</h4>
+                <p className="text-sm text-gray-700 italic">"{selectedOrder.feedback}"</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
