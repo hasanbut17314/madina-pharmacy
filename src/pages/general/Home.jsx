@@ -23,6 +23,7 @@ const fetchBrands = async () => {
   return [
     { id: 1, name: "Brand A", logo: "/abbott.webp" },
     { id: 2, name: "Brand B", logo: "/nestle.png" },
+    { id: 4, name: "Brand D", logo: "/reckitt.png" },
     // Add more mock brands as needed
   ];
 };
@@ -192,7 +193,7 @@ const Home = () => {
               <img
                 src={brand.logo}
                 alt={brand.name}
-                className="w-16 h-6 md:w-24 md:h-10 object-contain grayscale hover:grayscale-0 transition-all"
+                className=" h-6 md:h-10 object-contain grayscale hover:grayscale-0 transition-all"
               />
             </Card>
           ))}
