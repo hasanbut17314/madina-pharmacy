@@ -21,8 +21,8 @@ import { useAddItemToCartMutation } from "@/api/CartApi";
 // Mock data for brands (unchanged)
 const fetchBrands = async () => {
   return [
-    { id: 1, name: "Brand A", logo: "/path/to/logoA.png" },
-    { id: 2, name: "Brand B", logo: "/path/to/logoB.png" },
+    { id: 1, name: "Brand A", logo: "/abbott.webp" },
+    { id: 2, name: "Brand B", logo: "/nestle.png" },
     // Add more mock brands as needed
   ];
 };
@@ -93,7 +93,7 @@ const Home = () => {
           ]}
         >
           <CarouselContent>
-            {["/public/2.jpg", "/public/banner1.png", "/public/3.jpg"].map(
+            {["/2.jpg", "/banner1.png", "/3.jpg"].map(
               (image, index) => (
                 <CarouselItem key={index}>
                   <div className="relative">
