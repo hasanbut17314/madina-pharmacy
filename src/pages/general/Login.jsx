@@ -78,8 +78,10 @@ function Login() {
 
     try {
       const result = await loginUser(loginData).unwrap();
-      localStorage.setItem("user", JSON.stringify(result?.data.user));
-      dispatch(setLogin({ userData: result.user }));
+      localStorage.setItem("user", JSON.stringify(result?.data?.user));
+      localStorage.setItem("refreshToken", result?.data?.refreshToken);
+      localStorage.setItem("accessToken", result?.data?.accessToken);
+      dispatch(setLogin({ userData: result?.data?.user }));
 
       if (result?.data?.user?.role === "admin") {
         navigate("/admin");
