@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/select";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedCategory } from "@/store/slices/shopSlice";
-import { useGetProductsForUserQuery } from "@/api/productApi";
+import { useGetProductsForUserQuery } from "@/api/ProductApi";
 import { useAddItemToCartMutation } from "@/api/CartApi";
 import { addToCart } from "@/store/slices/cartSlice";
-import { useGetAllCategoriesQuery } from "@/api/catApi";
+import { useGetAllCategoriesQuery } from "@/api/CatApi";
 
 const Shop = () => {
   const navigate = useNavigate();

@@ -12,7 +12,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import ChatbotSection from "../../components/sections/ChatbotSection";
 import FeatureSection from "../../components/sections/FeatureSection";
-import { useGetProductsForUserQuery } from "@/api/productApi";
+import { useGetProductsForUserQuery } from "@/api/ProductApi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/store/slices/cartSlice";
@@ -21,8 +21,9 @@ import { useAddItemToCartMutation } from "@/api/CartApi";
 // Mock data for brands (unchanged)
 const fetchBrands = async () => {
   return [
-    { id: 1, name: "Brand A", logo: "/path/to/logoA.png" },
-    { id: 2, name: "Brand B", logo: "/path/to/logoB.png" },
+    { id: 1, name: "Brand A", logo: "/abbott.webp" },
+    { id: 2, name: "Brand B", logo: "/nestle.png" },
+    { id: 4, name: "Brand D", logo: "/reckitt.png" },
     // Add more mock brands as needed
   ];
 };
@@ -93,7 +94,7 @@ const Home = () => {
           ]}
         >
           <CarouselContent>
-            {["/public/2.jpg", "/public/banner1.png", "/public/3.jpg"].map(
+            {["/2.jpg", "/banner1.png", "/3.jpg"].map(
               (image, index) => (
                 <CarouselItem key={index}>
                   <div className="relative">
@@ -192,7 +193,7 @@ const Home = () => {
               <img
                 src={brand.logo}
                 alt={brand.name}
-                className="w-16 h-6 md:w-24 md:h-10 object-contain grayscale hover:grayscale-0 transition-all"
+                className=" h-6 md:h-10 object-contain grayscale hover:grayscale-0 transition-all"
               />
             </Card>
           ))}

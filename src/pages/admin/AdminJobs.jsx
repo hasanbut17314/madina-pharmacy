@@ -34,7 +34,7 @@ import {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
-} from "@/api/jobApi";
+} from "@/api/JobApi";
 
 const AdminJobs = () => {
   const [page, setPage] = useState(1);
