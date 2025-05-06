@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   useGetAllJobsQuery,
   useSubmitApplicationMutation,
-} from "../../api/jobApi";
+} from "../../api/JobApi";
 import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom"; // Import useHistory for redirect
 

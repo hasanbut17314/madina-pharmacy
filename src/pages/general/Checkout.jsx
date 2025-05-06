@@ -11,7 +11,7 @@ import {
   selectCartTotal,
   clearCart,
 } from "@/store/slices/cartSlice";
-import { useCreateOrderMutation } from "@/api/orderApi";
+import { useCreateOrderMutation } from "@/api/OrderApi";
 import { AlertCircle, CheckCircle, ShoppingBag } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 

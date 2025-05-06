@@ -40,7 +40,7 @@ import {
   useGetAllApplicationsQuery,
   useUpdateApplicationStatusMutation,
   useDeleteApplicationMutation,
-} from "@/api/jobApi";
+} from "@/api/JobApi";
 
 const AdminApp = () => {
   const [page, setPage] = useState(1);

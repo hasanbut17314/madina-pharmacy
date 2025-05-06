@@ -33,8 +33,8 @@ import {
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
-} from "@/api/productApi";
-import { useGetAllCategoriesQuery } from "@/api/catApi";
+} from "@/api/ProductApi";
+import { useGetAllCategoriesQuery } from "@/api/CatApi";
 
 const Products = () => {
   // Query parameters

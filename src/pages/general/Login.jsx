@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useLoginMutation, useRegisterMutation } from "@/api/authApi";
+import { useLoginMutation, useRegisterMutation } from "@/api/AuthApi";
 import { login as setLogin } from "@/store/slices/authSlice";
 
 function Login() {

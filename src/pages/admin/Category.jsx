@@ -25,7 +25,7 @@ import {
   useAddCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
-} from "@/api/catApi";
+} from "@/api/CatApi";
 
 const Categories = () => {
   const [page, setPage] = useState(1);

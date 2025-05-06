@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useLogoutMutation } from "@/api/authApi";
+import { useLogoutMutation } from "@/api/AuthApi";
 import { logout } from "@/store/slices/authSlice";
 
 const Header = () => {

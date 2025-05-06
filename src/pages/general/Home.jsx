@@ -12,7 +12,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import ChatbotSection from "../../components/sections/ChatbotSection";
 import FeatureSection from "../../components/sections/FeatureSection";
-import { useGetProductsForUserQuery } from "@/api/productApi";
+import { useGetProductsForUserQuery } from "@/api/ProductApi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/store/slices/cartSlice";
