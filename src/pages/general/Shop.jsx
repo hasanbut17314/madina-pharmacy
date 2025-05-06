@@ -30,12 +30,14 @@ const Shop = () => {
   );
 
   // Fetch categories for the dropdown
-  const { data: categoriesData, isLoading: categoriesLoading } =
+  const { data: categoriesData, isLoading: categoriesLoading, error } =
     useGetAllCategoriesQuery({
       page: 1,
       limit: 100,
       search: "",
     });
+  console.log(error);
+
 
   useEffect(() => {
     if (categoriesData?.data?.categories) {
@@ -47,7 +49,7 @@ const Shop = () => {
       setCategories(categoryList);
     }
   }, [categoriesData]);
-  
+
   // Update current category when the Redux state changes
   useEffect(() => {
     setCurrentCategory(selectedCategory);

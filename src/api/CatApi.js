@@ -1,8 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import customBaseQuery from "./customBaseQuery";
 
 export const categoryApi = createApi({
   reducerPath: "categoryApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  baseQuery: customBaseQuery,
   endpoints: (builder) => ({
     // Get all categories
     getAllCategories: builder.query({

@@ -20,9 +20,7 @@ const store = configureStore({
         [orderApi.reducerPath]: orderApi.reducer,
         [jobApi.reducerPath]: jobApi.reducer,
     },
-    middleware: (getDefaultMiddleware) => {
-        return getDefaultMiddleware().concat(authApi.middleware, productApi.middleware, cartApi.middleware, categoryApi.middleware, orderApi.middleware, jobApi.middleware);
-    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware, productApi.middleware, cartApi.middleware, categoryApi.middleware, orderApi.middleware, jobApi.middleware)
 });
 
 export default store;

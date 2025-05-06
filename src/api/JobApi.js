@@ -1,8 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import customBaseQuery from "./customBaseQuery";
 
 export const jobApi = createApi({
   reducerPath: "jobApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api" }), // Adjust base URL if necessary
+  baseQuery: customBaseQuery, // Adjust base URL if necessary
   endpoints: (builder) => ({
     // Create a new job
     createJob: builder.mutation({

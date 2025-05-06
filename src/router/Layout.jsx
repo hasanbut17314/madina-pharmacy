@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header, Footer, ScrollToTop } from "../components/basics";
 import { Outlet, useLocation } from "react-router-dom";
+import Chatbot from '../components/basics/Chatbot'
 
 function Layout() {
   const location = useLocation();
@@ -22,6 +23,7 @@ function Layout() {
       <ScrollToTop />
       <Header showNavLinks={showNavLinks} />
       <Outlet />
+      <Chatbot />
       {!shouldHideFooter && <Footer />}
     </>
   );

@@ -1,8 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import customBaseQuery from "./customBaseQuery";
 
 export const productApi = createApi({
   reducerPath: "productApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  baseQuery: customBaseQuery,
   endpoints: (builder) => ({
     // Get product by ID
     getProductById: builder.query({
