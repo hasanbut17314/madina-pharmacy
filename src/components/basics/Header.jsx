@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { LogOut, Menu, ShoppingCart, User } from "lucide-react";
+import { Home, LayoutDashboardIcon, LogOut, Menu, ShoppingCart, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -31,6 +31,8 @@ const Header = () => {
     location.pathname.startsWith(route)
   );
 
+  const isAdmin = user?.role
+  const onDashboard = location.pathname.includes("/admin");
   const isRiderOrManager = ["/rider", "/manager"].includes(location.pathname);
 
   const navLinks = [
@@ -192,6 +194,17 @@ const Header = () => {
           >
             <LogOut className="mr-2 h-5 w-5" />
             <span>Login</span>
+          </Button>
+        )}
+
+        {isAdmin && (
+          <Button
+            variant="secondary"
+            className="bg-[#457B9D] text-white hover:bg-[#1D4E79] hidden md:flex"
+            onClick={() => onDashboard ? navigate("/") : navigate("/admin")}
+          >
+            {onDashboard ? <Home className="mr-2 h-5 w-5" /> : <LayoutDashboardIcon className="h-5 w-5" />}
+            <span>{onDashboard ? "Home" : null}</span>
           </Button>
         )}
 
