@@ -151,7 +151,7 @@ const Home = () => {
                       className="w-full h-24 md:h-32 object-cover mb-2 rounded-md"
                     />
                   </div>
-                  <h3 className="text-xs md:text-sm font-medium mb-1">
+                  <h3 className="text-xs md:text-sm font-medium mb-1 truncate">
                     {product.name}
                   </h3>
                   <p className="text-red-600 font-bold mb-2 text-xs md:text-sm">
