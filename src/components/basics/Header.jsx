@@ -85,7 +85,8 @@ const Header = () => {
         <img
           src="/logo.webp"
           alt="Logo"
-          className="h-8 w-auto md:h-10 lg:h-12 mr-2"
+          className="h-8 w-auto md:h-10 lg:h-12 mr-2 cursor-pointer"
+          onClick={() => navigate('/')}
         />
       </div>
 
