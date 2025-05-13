@@ -92,7 +92,7 @@ const Manager = () => {
                       <td className="p-2 font-semibold">{order.order_no || order._id}</td>
                       <td className="p-2">{new Date(order.createdAt).toLocaleDateString()}</td>
                       <td className="p-2">{order.orderItems?.length || 0}</td>
-                      <td className="p-2">${order.totalPrice?.toFixed(2)}</td>
+                      <td className="p-2">{order.totalPrice?.toFixed(2)}</td>
                       <td className="p-2 flex items-center space-x-1">
                         {renderStatusIcon(order.status)}
                         <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>

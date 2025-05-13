@@ -107,7 +107,7 @@ const RiderOrder = () => {
                       <p className="text-[10px] text-gray-500">QTY: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold text-red-600">${item.price.toFixed(2)}</p>
+                      <p className="text-xs font-semibold text-red-600">{item.price.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -133,7 +133,7 @@ const RiderOrder = () => {
         <div className="bg-gray-50 px-4 py-3 border-t">
           <div className="flex justify-between pt-2 font-bold">
             <span className="text-sm text-gray-800">Total</span>
-            <span className="text-sm text-red-600">${order.totalPrice.toFixed(2)}</span>
+            <span className="text-sm text-red-600">{order.totalPrice.toFixed(2)}</span>
           </div>
         </div>
       </div>

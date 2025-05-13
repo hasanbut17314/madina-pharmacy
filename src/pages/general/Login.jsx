@@ -109,7 +109,6 @@ function Login() {
 
     try {
       const result = await registerUser(signupData).unwrap();
-      console.log(result.message);
 
       setSignupData({
         email: "",
