@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedCategory } from "@/store/slices/shopSlice";
-import { useGetProductsForUserQuery } from "@/api/ProductApi";
+import { useGetProductsForUserQuery, useGetProductsForUsersQuery } from "@/api/ProductApi";
 import { useAddItemToCartMutation } from "@/api/CartApi";
 import { addToCart } from "@/store/slices/cartSlice";
 import { useGetAllCategoriesQuery } from "@/api/CatApi";
@@ -62,7 +62,7 @@ const Shop = () => {
     data: productsData,
     isLoading: productsLoading,
     isError,
-  } = useGetProductsForUserQuery({
+  } = useGetProductsForUsersQuery({
     page: 1,
     limit: 30,
     search: searchQuery,
