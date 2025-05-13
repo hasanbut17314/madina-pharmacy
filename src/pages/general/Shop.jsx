@@ -132,7 +132,7 @@ const Shop = () => {
                 />
                 <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
                 <p className="text-gray-600">{product.description}</p>
-                <p className="mt-4 text-lg font-semibold">{product.price} USD</p>
+                <p className="mt-4 text-lg font-semibold">{product.price}.00 Rs</p>
                 <Button
                   onClick={() => handleAddToCart(product._id)}
                   className="mt-4 w-full"

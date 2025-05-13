@@ -111,13 +111,13 @@ const AdminOrders = () => {
                       {item.prodId.name} x {item.quantity}
                     </span>
                     <span className="font-medium">
-                      ${item.price.toFixed(2)}
+                      {item.price.toFixed(2)}
                     </span>
                   </div>
                 ))}
                 <div className="flex justify-between pt-1 border-t text-sm font-semibold">
                   <span>Total:</span>
-                  <span>${selectedOrder.totalPrice?.toFixed(2)}</span>
+                  <span>{selectedOrder.totalPrice?.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -172,7 +172,7 @@ const AdminOrders = () => {
                         <td className="p-2 font-semibold">{order.order_no || order._id}</td>
                         <td className="p-2">{new Date(order.createdAt).toLocaleDateString()}</td>
                         <td className="p-2">{order.orderItems?.length || 0}</td>
-                        <td className="p-2">${order.totalPrice?.toFixed(2)}</td>
+                        <td className="p-2">{order.totalPrice?.toFixed(2)}</td>
                         <td className="p-2 flex items-center space-x-1">
                           {renderStatusIcon(order.status)}
                           <span className={getStatusColor(order.status)}>

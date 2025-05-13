@@ -82,7 +82,7 @@ const AdminJobs = () => {
     // Format with commas and dollar sign
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "pkr",
       maximumFractionDigits: 0,
     }).format(amount);
   };
