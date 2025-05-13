@@ -28,6 +28,16 @@ export const productApi = createApi({
         `/product/getProductsForUser?page=${page}&limit=${limit}&search=${search}&category=${category}&isFeatured=${isFeatured}`,
     }),
 
+    getProductsForUsers: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        category = "",
+      }) =>
+        `/product/getProductsForUser?page=${page}&limit=${limit}&search=${search}&category=${category}`,
+    }),
+
     // Add a new product
     addProduct: builder.mutation({
       query: (formData) => ({
@@ -60,6 +70,7 @@ export const {
   useGetProductByIdQuery,
   useGetAllProductsQuery,
   useGetProductsForUserQuery,
+  useGetProductsForUsersQuery,
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
