@@ -31,9 +31,11 @@ const Header = () => {
     location.pathname.startsWith(route)
   );
 
-  const isAdmin = user?.role
+  const isAdmin = user?.role;
   const onDashboard = location.pathname.includes("/admin");
-  const isRiderOrManager = ["/rider", "/manager"].includes(location.pathname);
+
+  // ✅ FIXED: role-based check instead of pathname
+  const isRiderOrManager = user?.role === "rider" || user?.role === "manager";
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -175,7 +177,7 @@ const Header = () => {
         )}
 
         {/* Logout Button */}
-        {user && !isRiderOrManager ? (
+        {user ? (
           <Button
             variant="secondary"
             className="bg-[#457B9D] text-white hover:bg-[#1D4E79] hidden md:flex"
@@ -183,9 +185,7 @@ const Header = () => {
             disabled={isLoggingOut}
           >
             <LogOut className="mr-2 h-5 w-5" />
-            <span>
-              {isLoggingOut ? "Logging out..." : "Logout"}
-            </span>
+            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
           </Button>
         ) : (
           <Button
@@ -283,7 +283,7 @@ const Header = () => {
                   variant="secondary"
                   className="bg-[#457B9D] text-white hover:bg-[#1D4E79] w-full mt-6 rounded-md"
                   onClick={() => {
-                    handleLogout();
+                    user ? handleLogout() : navigate("/login");
                     setIsSheetOpen(false);
                   }}
                   disabled={isLoggingOut}
@@ -296,20 +296,6 @@ const Header = () => {
               )}
             </SheetContent>
           </Sheet>
-        )}
-
-        {isRiderOrManager && (
-          <Button
-            variant="secondary"
-            className="bg-[#457B9D] text-white hover:bg-[#1D4E79] w-full mt-0 rounded-md"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-          >
-            <LogOut className="mr-2 h-5 w-5" />
-            <span>
-              {user ? (isLoggingOut ? "Logging out..." : "Logout") : "Login"}
-            </span>
-          </Button>
         )}
       </div>
     </header>
