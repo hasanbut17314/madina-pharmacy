@@ -160,7 +160,7 @@ const Cart = () => {
               ) : (
                 cartItems.map((item) => (
                   <TableRow key={item.prodId || item._id}>
-                    <TableCell>{item.title}</TableCell>
+                    <TableCell><span className="truncate">{item.title}</span></TableCell>
                     <TableCell className="text-red-600 font-semibold">
                       {(item.price || 0).toFixed(2)}
                     </TableCell>

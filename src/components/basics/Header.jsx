@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Home, LayoutDashboardIcon, LogOut, Menu, ShoppingCart, User } from "lucide-react";
+import {
+  Home,
+  LayoutDashboardIcon,
+  LogOut,
+  Menu,
+  ShoppingCart,
+  User,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -45,10 +52,13 @@ const Header = () => {
     { name: "Career", href: "/career" },
   ];
 
-  // 🛡️ AUTO REDIRECT Handling
   useEffect(() => {
     if (!user) {
-      if (restrictedRoutes.some((route) => location.pathname.startsWith(route))) {
+      if (
+        restrictedRoutes.some((route) =>
+          location.pathname.startsWith(route)
+        )
+      ) {
         navigate("/login", { replace: true });
       }
     } else {
@@ -141,7 +151,7 @@ const Header = () => {
         )}
 
         {/* Profile Menu */}
-        {shouldShowNavElements && (
+        {shouldShowNavElements && user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -159,22 +169,10 @@ const Header = () => {
               <DropdownMenuItem onClick={() => navigate("/user/orders")}>
                 Orders
               </DropdownMenuItem>
-              {user ? (
-                <DropdownMenuItem
-                  className="text-red-500"
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                >
-                  {isLoggingOut ? "Logging out..." : "Logout"}
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onClick={() => navigate("/login")}>
-                  Login
-                </DropdownMenuItem>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
 
         {/* Logout Button */}
         {user ? (
@@ -187,7 +185,7 @@ const Header = () => {
             <LogOut className="mr-2 h-5 w-5" />
             <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
           </Button>
-        ) : (
+        ) : !isRiderOrManager && (
           <Button
             variant="secondary"
             className="bg-[#457B9D] text-white hover:bg-[#1D4E79] hidden md:flex"
@@ -198,14 +196,21 @@ const Header = () => {
           </Button>
         )}
 
+        {/* Admin Dashboard Button */}
         {isAdmin && (
           <Button
             variant="secondary"
             className="bg-[#457B9D] text-white hover:bg-[#1D4E79] hidden md:flex"
-            onClick={() => onDashboard ? navigate("/") : navigate("/admin")}
+            onClick={() => (onDashboard ? navigate("/") : navigate("/admin"))}
           >
-            {onDashboard ? <Home className="mr-2 h-5 w-5" /> : <LayoutDashboardIcon className="h-5 w-5" />}
-            <span>{onDashboard ? "Home" : null}</span>
+            {onDashboard ? (
+              <>
+                <Home className="mr-2 h-5 w-5" />
+                <span>Home</span>
+              </>
+            ) : (
+              <LayoutDashboardIcon className="h-5 w-5" />
+            )}
           </Button>
         )}
 
@@ -265,7 +270,8 @@ const Header = () => {
                 </nav>
               )}
 
-              {shouldShowNavElements && (
+              {/* Mobile Profile */}
+              {shouldShowNavElements && user && (
                 <span
                   onClick={() => {
                     navigate("/user");
@@ -278,6 +284,7 @@ const Header = () => {
                 </span>
               )}
 
+              {/* Mobile Login/Logout */}
               {!isRiderOrManager && (
                 <Button
                   variant="secondary"
@@ -297,6 +304,7 @@ const Header = () => {
             </SheetContent>
           </Sheet>
         )}
+
       </div>
     </header>
   );
