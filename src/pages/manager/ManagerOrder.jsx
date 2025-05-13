@@ -31,7 +31,6 @@ const ManagerOrder = () => {
   const invoiceRef = useRef();
 
   const order = data?.data;
-  console.log(order);
 
   const handleDownloadInvoice = () => {
     setShowInvoice(true);
@@ -105,7 +104,7 @@ const ManagerOrder = () => {
                     <tr key={idx} className="border-b">
                       <td className="py-2 px-3">{item.name}</td>
                       <td className="py-2 px-3 text-right">{item.quantity}</td>
-                      <td className="py-2 px-3 text-right">${item.price.toFixed(2)}</td>
+                      <td className="py-2 px-3 text-right">{item.price.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -114,7 +113,7 @@ const ManagerOrder = () => {
               <div className="flex justify-end">
                 <div>
                   <p className="text-lg font-semibold">
-                    Total: <span className="text-red-600">${order.totalPrice.toFixed(2)}</span>
+                    Total: <span className="text-red-600">{order.totalPrice.toFixed(2)}</span>
                   </p>
                 </div>
               </div>
@@ -238,7 +237,7 @@ const ManagerOrder = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-semibold text-red-600">
-                        ${item.price.toFixed(2)}
+                        {item.price.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -259,7 +258,7 @@ const ManagerOrder = () => {
         <div className="bg-gray-50 px-4 py-3 border-t">
           <div className="flex justify-between pt-2 font-bold">
             <span className="text-sm text-gray-800">Total</span>
-            <span className="text-sm text-red-600">${order.totalPrice.toFixed(2)}</span>
+            <span className="text-sm text-red-600">{order.totalPrice.toFixed(2)}</span>
           </div>
         </div>
       </div>

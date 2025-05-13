@@ -130,7 +130,7 @@ const Checkout = () => {
               <div className="flex justify-between mb-2">
                 <span>Items ({cartItems?.length || 0}):</span>
                 <span>
-                  $
+                  
                   {typeof cartTotal === "number"
                     ? cartTotal.toFixed(2)
                     : "0.00"}
@@ -138,12 +138,12 @@ const Checkout = () => {
               </div>
               <div className="flex justify-between mb-2">
                 <span>Delivery Fee:</span>
-                <span>$0.00</span>
+                <span>0.00</span>
               </div>
               <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
                 <span>Total:</span>
                 <span className="text-red-600">
-                  $
+                  
                   {typeof cartTotal === "number"
                     ? cartTotal.toFixed(2)
                     : "0.00"}

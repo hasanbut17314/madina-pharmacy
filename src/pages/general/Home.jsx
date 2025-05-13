@@ -155,7 +155,7 @@ const Home = () => {
                     {product.name}
                   </h3>
                   <p className="text-red-600 font-bold mb-2 text-xs md:text-sm">
-                    ${product.price.toFixed(2)}
+                    {product.price.toFixed(2)} 
                   </p>
                   <Button
                     size="sm"

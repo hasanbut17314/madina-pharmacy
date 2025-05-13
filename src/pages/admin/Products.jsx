@@ -353,7 +353,7 @@ const Products = () => {
                           getCategoryName(product.category)}
                       </TableCell>
                       <TableCell>{product.quantity}</TableCell>
-                      <TableCell>${product.price}</TableCell>
+                      <TableCell>{product.price}</TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${

@@ -162,7 +162,7 @@ const Cart = () => {
                   <TableRow key={item.prodId || item._id}>
                     <TableCell><span className="truncate">{item.title}</span></TableCell>
                     <TableCell className="text-red-600 font-semibold">
-                      ${(item.price || 0).toFixed(2)}
+                      {(item.price || 0).toFixed(2)}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
@@ -206,7 +206,7 @@ const Cart = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-red-600 font-semibold">
-                      ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                      {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -232,7 +232,7 @@ const Cart = () => {
             <p className="text-xl font-semibold">
               Grand Total:{" "}
               <span className="text-red-600">
-                ${typeof cartTotal === "number" ? cartTotal.toFixed(2) : "0.00"}
+                {typeof cartTotal === "number" ? cartTotal.toFixed(2) : "0.00"} Rs
               </span>
             </p>
             <Button

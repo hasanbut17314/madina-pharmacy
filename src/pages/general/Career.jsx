@@ -60,7 +60,6 @@ function Career() {
 
     try {
       const res = await submitApplication(formData).unwrap();
-      console.log("Application submitted successfully:", res);
       
       // Show success message
       alert("Application submitted successfully!");

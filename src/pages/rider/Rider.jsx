@@ -13,7 +13,6 @@ const Rider = () => {
   const { data, isLoading, isError } = useGetRiderOrdersQuery({ page, limit });
 
   const orders = data?.data?.orders || [];
-  console.log('Orders:', orders); // Debugging line to check the orders data
   const pagination = data?.data?.pagination || { page: 1, limit: 5, total: 0 };
   const totalPages = Math.ceil(pagination.total / limit);
 
@@ -79,7 +78,7 @@ const Rider = () => {
                       <td className="p-2 font-semibold">{order.order_no || order.id}</td>
                       <td className="p-2">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ''}</td>
                       <td className="p-2">{order.orderItems.length || 0}</td>
-                      <td className="p-2">${order.totalPrice?.toFixed(2)}</td>
+                      <td className="p-2">{order.totalPrice?.toFixed(2)}</td>
                       <td className="p-2 flex items-center space-x-1">
                         {renderStatusIcon(order.status)}
                         <span>{order.status}</span>

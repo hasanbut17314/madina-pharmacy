@@ -40,7 +40,9 @@ const Header = () => {
 
   const isAdmin = user?.role;
   const onDashboard = location.pathname.includes("/admin");
-  const isRiderOrManager = ["/rider", "/manager"].includes(location.pathname);
+
+  // ✅ FIXED: role-based check instead of pathname
+  const isRiderOrManager = user?.role === "rider" || user?.role === "manager";
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -95,7 +97,8 @@ const Header = () => {
         <img
           src="/logo.webp"
           alt="Logo"
-          className="h-8 w-auto md:h-10 lg:h-12 mr-2"
+          className="h-8 w-auto md:h-10 lg:h-12 mr-2 cursor-pointer"
+          onClick={() => navigate('/')}
         />
       </div>
 
@@ -170,8 +173,9 @@ const Header = () => {
           </DropdownMenu>
         )}
 
-        {/* Logout / Login Button (Desktop - only if not rider or manager) */}
-        {user && !isRiderOrManager ? (
+
+        {/* Logout Button */}
+        {user ? (
           <Button
             variant="secondary"
             className="bg-[#457B9D] text-white hover:bg-[#1D4E79] hidden md:flex"
@@ -301,20 +305,6 @@ const Header = () => {
           </Sheet>
         )}
 
-        {/* Logout Button for Rider/Manager */}
-        {isRiderOrManager && (
-          <Button
-            variant="secondary"
-            className="bg-[#457B9D] text-white hover:bg-[#1D4E79] w-50 mt-0 rounded-md"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-          >
-            <LogOut className="mr-2 h-5 w-5" />
-            <span>
-              {user ? (isLoggingOut ? "Logging out..." : "Logout") : "Login"}
-            </span>
-          </Button>
-        )}
       </div>
     </header>
   );

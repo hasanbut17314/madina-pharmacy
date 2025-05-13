@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetRiderOrdersQuery, useUpdateOrderStatusByRiderMutation } from '../../api/OrderApi';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
 
 const RiderOrder = () => {
   const { orderId } = useParams();
@@ -14,15 +13,13 @@ const RiderOrder = () => {
   const [updateOrderStatus, { isLoading: isUpdating, isSuccess }] = useUpdateOrderStatusByRiderMutation();
   const [showDeliveryAlert, setShowDeliveryAlert] = useState(false);
 
-  // Find the order matching the orderId
   const order = data?.data?.orders.find((order) => order._id === orderId);
 
-  // Handle Mark as Delivered API Call
   const handleMarkDelivered = async () => {
     try {
       await updateOrderStatus({ id: order._id, status: 'Delivered' }).unwrap();
       setShowDeliveryAlert(true);
-      setTimeout(() => setShowDeliveryAlert(false), 3000); // Show alert for a few seconds
+      setTimeout(() => setShowDeliveryAlert(false), 3000);
     } catch (error) {
       console.error('Failed to update order status:', error);
     }
@@ -91,6 +88,8 @@ const RiderOrder = () => {
                 <p className="text-xs">{order.address}</p>
               </div>
             </div>
+
+            
           </div>
 
           {/* Order Items */}
@@ -107,7 +106,7 @@ const RiderOrder = () => {
                       <p className="text-[10px] text-gray-500">QTY: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold text-red-600">${item.price.toFixed(2)}</p>
+                      <p className="text-xs font-semibold text-red-600">{item.price.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -133,11 +132,28 @@ const RiderOrder = () => {
         <div className="bg-gray-50 px-4 py-3 border-t">
           <div className="flex justify-between pt-2 font-bold">
             <span className="text-sm text-gray-800">Total</span>
-            <span className="text-sm text-red-600">${order.totalPrice.toFixed(2)}</span>
+            <span className="text-sm text-red-600">{order.totalPrice.toFixed(2)}</span>
           </div>
         </div>
       </div>
+      {/* Map Preview */}
+      {order.address && (
+              <div className="mt-4">
+                <h2 className="text-sm font-semibold mb-2 text-gray-700">Delivery Location</h2>
+                <div className="border rounded-lg overflow-hidden h-64">
+                  <iframe
+                    title="Google Map"
+                    width="100%"
+                    height="100%"
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(order.address)}&output=embed`}
+                  ></iframe>
+                </div>
+              </div>
+            )}
     </div>
+    
   );
 };
 

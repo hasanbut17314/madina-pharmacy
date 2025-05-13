@@ -36,7 +36,6 @@ const Shop = () => {
       limit: 100,
       search: "",
     });
-  console.log(error);
 
 
   useEffect(() => {
