@@ -19,7 +19,8 @@ import {
   Category,
   AdminOrders,
   AdminJobs,
-  AdminApp
+  AdminApp,
+  AdminUsers
 } from "../pages/admin";
 import { UserProfile } from "../pages/user";
 import { Rider, RiderOrders } from "../pages/rider";
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
           { path: "orders", element: <AdminOrders /> },
           { path: "jobs", element: <AdminJobs /> },
           { path: "application", element: <AdminApp /> },
+          { path: "users", element: <AdminUsers /> },
         ],
       },
 

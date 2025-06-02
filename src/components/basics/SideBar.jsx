@@ -10,6 +10,7 @@ import {
   LogOut,
   Briefcase,
   FileText,
+  User
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -49,6 +50,12 @@ const SideBar = ({ children }) => {
       label: "Applications",
       icon: FileText,
       link: "/admin/Application",
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: User,
+      link: "/admin/users",
     },
   ];
   const SidebarContent = ({ mobile = false }) => (

@@ -5,18 +5,17 @@ export const productApi = createApi({
   reducerPath: "productApi",
   baseQuery: customBaseQuery,
   endpoints: (builder) => ({
-    // Get product by ID
+    // Existing endpoints...
+
     getProductById: builder.query({
       query: (id) => `/product/getProductById/${id}`,
     }),
 
-    // Get all products
     getAllProducts: builder.query({
       query: ({ page = 1, limit = 10, search = "", category = "" }) =>
         `/product/getAllProducts?page=${page}&limit=${limit}&search=${search}&category=${category}`,
     }),
 
-    // Get products for users (filtered, featured)
     getProductsForUser: builder.query({
       query: ({
         page = 1,
@@ -29,16 +28,10 @@ export const productApi = createApi({
     }),
 
     getProductsForUsers: builder.query({
-      query: ({
-        page = 1,
-        limit = 10,
-        search = "",
-        category = "",
-      }) =>
+      query: ({ page = 1, limit = 10, search = "", category = "" }) =>
         `/product/getProductsForUser?page=${page}&limit=${limit}&search=${search}&category=${category}`,
     }),
 
-    // Add a new product
     addProduct: builder.mutation({
       query: (formData) => ({
         url: "/product/add",
@@ -47,7 +40,6 @@ export const productApi = createApi({
       }),
     }),
 
-    // Update a product by ID
     updateProduct: builder.mutation({
       query: ({ id, formData }) => ({
         url: `/product/update/${id}`,
@@ -56,12 +48,29 @@ export const productApi = createApi({
       }),
     }),
 
-    // Delete a product by ID
     deleteProduct: builder.mutation({
       query: (id) => ({
         url: `/product/delete/${id}`,
         method: "DELETE",
       }),
+    }),
+
+    // New analytics endpoints
+
+    getTotalAnalytics: builder.query({
+      query: () => `/analytics/totalAnalytics`,
+    }),
+
+    getRecentOrders: builder.query({
+      query: () => `/analytics/recentOrders`,
+    }),
+
+    getMonthlySalesOverview: builder.query({
+      query: () => `/analytics/getMonthlySalesOverview`,
+    }),
+
+    getSalesByCategory: builder.query({
+      query: () => `/analytics/salesByCategory`,
     }),
   }),
 });
@@ -74,4 +83,10 @@ export const {
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+
+  // Export hooks for new analytics endpoints
+  useGetTotalAnalyticsQuery,
+  useGetRecentOrdersQuery,
+  useGetMonthlySalesOverviewQuery,
+  useGetSalesByCategoryQuery,
 } = productApi;
