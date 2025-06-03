@@ -60,7 +60,7 @@ const Footer = () => {
             {section.links.map((link, linkIndex) => (
               <a
                 key={linkIndex}
-                href="#"
+                href={link === 'About Our Team' ? '/about' : link === 'Contact Pharmacist' ? '/contact' : link === 'Feedback' ? '/contact' : '#'}
                 className="block text-sm text-white/80 
                            hover:text-white 
                            hover:underline 

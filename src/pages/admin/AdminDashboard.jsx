@@ -219,7 +219,7 @@ function AdminDashboard() {
                             <td className="py-2">
                               {new Date(order.createdAt).toLocaleDateString()}
                             </td>
-                            <td className="py-2">${order.totalPrice}</td>
+                            <td className="py-2">Rs.{order.totalPrice}</td>
                             <td className="py-2">
                               <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">
                                 {order.status}

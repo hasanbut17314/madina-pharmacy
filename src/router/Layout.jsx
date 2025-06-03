@@ -18,12 +18,18 @@ function Layout() {
     location.pathname.startsWith(route)
   );
 
+  const hideChatbotRoutes = ["/admin", "/manager", "/rider"];
+  const showChatbot = !hideChatbotRoutes.some((route) =>
+    location.pathname.startsWith(route)
+  );
+
+
   return (
     <>
       <ScrollToTop />
       <Header showNavLinks={showNavLinks} />
       <Outlet />
-      <Chatbot />
+      {showChatbot && <Chatbot />}
       {!shouldHideFooter && <Footer />}
     </>
   );
