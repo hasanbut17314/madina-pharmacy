@@ -81,6 +81,14 @@ export const authApi = createApi({
         body: updatedUserData, // expects: { firstName, lastName, email }
       }),
     }),
+
+    updateByAdmin: builder.mutation({
+      query: ({ id, updatedUserData }) => ({
+        url: `/user/updateByAdmin/${id}`,
+        method: "PUT",
+        body: updatedUserData, // expects: { firstName, lastName, role, isActive }
+      }),
+    }),
   }),
 });
 
@@ -95,4 +103,5 @@ export const {
   useVerifyEmailQuery,
   useAddUserMutation,          // ✅ New
   useUpdateUserInfoMutation,   // ✅ New
+  useUpdateByAdminMutation,     // ✅ New
 } = authApi;

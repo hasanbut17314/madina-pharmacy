@@ -3,7 +3,7 @@ import { SideBar } from "../../components/basics";
 import {
   useGetAllUsersQuery,
   useAddUserMutation,
-  useUpdateUserInfoMutation,
+  useUpdateByAdminMutation,
 } from "@/api/authApi"; // Adjust if necessary
 
 function AdminUsers() {
@@ -14,7 +14,7 @@ function AdminUsers() {
   // Fetch users with pagination
   const { data, error, isLoading, refetch } = useGetAllUsersQuery({ page, limit });
   const [addUser] = useAddUserMutation();
-  const [updateUserInfo] = useUpdateUserInfoMutation();
+  const [updateByAdmin] = useUpdateByAdminMutation();
 
   // Modal state
   const [isAddModalOpen, setAddModalOpen] = useState(false);
@@ -31,6 +31,7 @@ function AdminUsers() {
     role: "",
     password: "",
     confirmPassword: "",
+    isActive: true,
   });
 
   // Handle form input changes
@@ -48,20 +49,19 @@ function AdminUsers() {
       role: "",
       password: "",
       confirmPassword: "",
+      isActive: true,
     });
     setAddModalOpen(true);
   };
 
-  // Open Update User modal and fill form (no role)
+  // Open Update User modal and fill form
   const openUpdateModal = (user) => {
     setSelectedUser(user);
     setForm({
       firstName: user.firstName || "",
       lastName: user.lastName || "",
-      email: user.email || "",
-      role: "", // role removed from update form
-      password: "",
-      confirmPassword: "",
+      role: user.role || "",
+      isActive: user.isActive ?? true,
     });
     setUpdateModalOpen(true);
   };
@@ -88,14 +88,19 @@ function AdminUsers() {
     }
   };
 
-  // Update User handler — only firstName, lastName, email (no role)
+  // Update User handler
   const handleUpdateUser = async () => {
     try {
-      await updateUserInfo({
-        id: selectedUser._id,
+      const updateData = {
         firstName: form.firstName,
         lastName: form.lastName,
-        email: form.email,
+        role: form.role,
+        isActive: form.isActive,
+      };
+
+      await updateByAdmin({
+        id: selectedUser._id,
+        updatedUserData: updateData
       }).unwrap();
 
       setUpdateModalOpen(false);
@@ -173,9 +178,8 @@ function AdminUsers() {
               <button
                 onClick={goPrev}
                 disabled={page === 1}
-                className={`px-4 py-2 rounded border ${
-                  page === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"
-                }`}
+                className={`px-4 py-2 rounded border ${page === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"
+                  }`}
               >
                 Prev
               </button>
@@ -185,9 +189,8 @@ function AdminUsers() {
               <button
                 onClick={goNext}
                 disabled={page === totalPages}
-                className={`px-4 py-2 rounded border ${
-                  page === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"
-                }`}
+                className={`px-4 py-2 rounded border ${page === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-white hover:bg-gray-100"
+                  }`}
               >
                 Next
               </button>
@@ -229,9 +232,8 @@ function AdminUsers() {
 function Modal({ children, onClose, title, noOverlay }) {
   return (
     <div
-      className={`fixed inset-0 flex justify-center items-center z-50 ${
-        noOverlay ? "" : "bg-black bg-opacity-20"
-      }`}
+      className={`fixed inset-0 flex justify-center items-center z-50 ${noOverlay ? "" : "bg-black bg-opacity-20"
+        }`}
       onClick={onClose}
     >
       <div
@@ -286,34 +288,52 @@ function UserForm({ form, onChange, onSubmit, submitText, isUpdate }) {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Email</label>
-        <input
-          name="email"
-          value={form.email}
-          onChange={onChange}
-          type="email"
-          required
-          className="w-full border border-gray-300 rounded px-3 py-2"
-        />
-      </div>
-
-      {/* Role only on Add User */}
+      {/* Email field only on Add User */}
       {!isUpdate && (
         <div>
-          <label className="block text-sm font-medium mb-1">Role</label>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            name="email"
+            value={form.email}
+            onChange={onChange}
+            type="email"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
+      )}
+
+      {/* Role field for both Add and Update */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Role</label>
+        <select
+          name="role"
+          value={form.role}
+          onChange={onChange}
+          required
+          className="w-full border border-gray-300 rounded px-3 py-2"
+        >
+          <option value="">Select Role</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="manager">Manager</option>
+          <option value="rider">Rider</option>
+        </select>
+      </div>
+
+      {/* isActive field only for Update */}
+      {isUpdate && (
+        <div>
+          <label className="block text-sm font-medium mb-1">Status</label>
           <select
-            name="role"
-            value={form.role}
+            name="isActive"
+            value={form.isActive}
             onChange={onChange}
             required
             className="w-full border border-gray-300 rounded px-3 py-2"
           >
-            <option value="">Select Role</option>
-            <option value="admin">admin</option>
-            <option value="user">user</option>
-            <option value="manager">manager</option>
-            <option value="rider">rider</option>
+            <option value={true}>Active</option>
+            <option value={false}>Inactive</option>
           </select>
         </div>
       )}
